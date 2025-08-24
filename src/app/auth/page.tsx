@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, Suspense } from "react";
@@ -134,12 +135,13 @@ function AuthForm() {
             {formType === "login"
               ? "Don't have an account? "
               : "Already have an account? "}
-            <button
+            <Button
+              variant="link"
               onClick={toggleFormType}
-              className="font-medium text-primary underline-offset-4 hover:underline"
+              className="font-medium text-primary underline-offset-4 hover:underline p-0"
             >
               {formType === "login" ? "Sign up" : "Log in"}
-            </button>
+            </Button>
           </div>
         </CardContent>
       </Card>
