@@ -1,7 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { Code, Twitter, Github, Linkedin } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function Footer() {
+  const [year, setYear] = useState(new Date().getFullYear());
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer className="border-t border-primary/10 bg-background">
       <div className="container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -13,7 +22,7 @@ export function Footer() {
             </span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} NANITES TechFest. All rights reserved.
+            © {year} NANITES TechFest. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <Link href="#" aria-label="Twitter">
