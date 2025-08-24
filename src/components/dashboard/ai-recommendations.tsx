@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { recommendEventCategories } from "@/ai/flows/recommend-event-categories";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +17,24 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Bot, Lightbulb, Loader2 } from "lucide-react";
 import { eventCategoriesList } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 export function AiRecommendations() {
-  const [userProfile, setUserProfile] = useState(
-    "I am a second-year computer science student interested in full-stack development and competitive programming. I enjoy building web apps with React and Node.js."
-  );
+  const { userData } = useAuth();
+  const [userProfile, setUserProfile] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(eventCategoriesList);
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (userData?.profile) {
+      setUserProfile(userData.profile);
+    } else {
+        setUserProfile("I am a student interested in technology and innovation.");
+    }
+  }, [userData]);
+
 
   const handleCheckboxChange = (category: string, checked: boolean | "indeterminate") => {
     if (checked) {
@@ -66,7 +75,7 @@ export function AiRecommendations() {
             <Bot className="h-6 w-6 text-primary" /> AI Event Recommendations
           </CardTitle>
           <CardDescription>
-            Describe your interests and let our AI suggest the best event categories for you.
+            Describe your interests and let our AI suggest the best event categories for you. You can update your profile in your account settings.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

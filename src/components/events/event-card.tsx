@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Event } from "@/lib/types";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,9 +41,11 @@ export function EventCard({ event }: EventCardProps) {
                 <span>{event.time}</span>
             </div>
         </div>
-        <Button variant="link" className="p-0 h-auto text-primary">
-          View Details
-          <ArrowRight className="ml-2 h-4 w-4" />
+        <Button variant="link" className="p-0 h-auto text-primary" asChild>
+          <Link href={`/events/${event.id}`}>
+            View Details
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </Button>
       </CardFooter>
     </Card>
