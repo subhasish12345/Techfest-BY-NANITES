@@ -28,11 +28,9 @@ export function CountdownTimer({ targetDate }: CountdownTimerProps) {
   };
 
   const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
-  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
-    // Set initial value
+    // Set initial value on the client
     setTimeLeft(calculateTimeLeft());
 
     const timer = setInterval(() => {
@@ -42,15 +40,11 @@ export function CountdownTimer({ targetDate }: CountdownTimerProps) {
     return () => clearInterval(timer);
   }, [targetDate]);
 
-  if (!isClient) {
-    return null; // Don't render on the server
-  }
-
-  const timeParts = timeLeft ? Object.entries(timeLeft) : [];
-  
   if (!timeLeft) {
     return <div className="font-code text-2xl md:text-4xl text-accent">The Fest is Live!</div>;
   }
+
+  const timeParts = Object.entries(timeLeft);
 
   return (
     <div className="flex justify-center gap-4 md:gap-8">
