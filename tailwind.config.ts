@@ -8,11 +8,18 @@ export default {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px',
+      },
+    },
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
-        code: ['monospace'],
+        body: ['var(--font-inter)', 'sans-serif'],
+        headline: ['var(--font-orbitron)', 'sans-serif'],
+        code: ['var(--font-jetbrains-mono)', 'monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -88,10 +95,15 @@ export default {
             height: '0',
           },
         },
+        'glow': {
+          '0%, 100%': { opacity: '0.7' },
+          '50%': { opacity: '1' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'glow': 'glow 3s ease-in-out infinite',
       },
     },
   },
