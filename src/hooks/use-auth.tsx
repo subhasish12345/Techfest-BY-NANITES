@@ -16,6 +16,7 @@ import {
   updateProfile,
   User,
 } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { doc, setDoc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
@@ -84,7 +85,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await signInWithEmailAndPassword(auth, email, pass);
       router.push("/dashboard");
     } catch (e: any) {
-      setError(e.message);
+       if (e instanceof FirebaseError && e.code === 'auth/invalid-credential') {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        setError(e.message);
+      }
       console.error(e);
     } finally {
       setLoading(false);
