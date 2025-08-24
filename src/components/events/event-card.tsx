@@ -17,8 +17,9 @@ export function EventCard({ event }: EventCardProps) {
           <Image
             src={event.image}
             alt={event.title}
-            layout="fill"
-            objectFit="cover"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            style={{ objectFit: "cover" }}
             data-ai-hint="event cover"
           />
         </div>

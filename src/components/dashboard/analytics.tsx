@@ -1,9 +1,8 @@
-
 "use client"
 
 import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 const userEngagementData = [
   { date: "Day 1", users: 1200 },
@@ -32,9 +31,9 @@ export function DashboardAnalytics() {
           <CardTitle className="font-headline text-2xl">User Engagement</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px]">
+          <ChartContainer config={{}} className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={userEngagementData}>
+              <LineChart data={userEngagementData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
                 <Tooltip
                   cursor={false}
                   content={<ChartTooltipContent indicator="line" />}
@@ -44,7 +43,7 @@ export function DashboardAnalytics() {
                 <Line type="monotone" dataKey="users" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: "hsl(var(--primary))" }} />
               </LineChart>
             </ResponsiveContainer>
-          </div>
+          </ChartContainer>
         </CardContent>
       </Card>
       <Card className="bg-card border-primary/20">
@@ -52,9 +51,9 @@ export function DashboardAnalytics() {
           <CardTitle className="font-headline text-2xl">Event Participation</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px]">
+          <ChartContainer config={{}} className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={eventParticipationData}>
+              <BarChart data={eventParticipationData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
                 <Tooltip
                   cursor={false}
                   content={<ChartTooltipContent indicator="dot" />}
@@ -64,7 +63,7 @@ export function DashboardAnalytics() {
                 <Bar dataKey="participants" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </ChartContainer>
         </CardContent>
       </Card>
     </div>
