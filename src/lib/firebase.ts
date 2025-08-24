@@ -7,12 +7,12 @@ import {getFirestore} from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: 'TODO: YOUR_API_KEY',
-  authDomain: 'TODO: YOUR_AUTH_DOMAIN',
-  projectId: 'TODO: YOUR_PROJECT_ID',
-  storageBucket: 'TODO: YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'TODO: YOUR_MESSAGING_SENDER_ID',
-  appId: 'TODO: YOUR_APP_ID',
+  "projectId": "techfest-website-by-nanites",
+  "appId": "1:370163727149:web:c928febd162d6b3e4df1a4",
+  "storageBucket": "techfest-website-by-nanites.firebasestorage.app",
+  "apiKey": "AIzaSyA81SHJIzWWzmiCpSkhZ87qfX0roSWBFN0",
+  "authDomain": "techfest-website-by-nanites.firebaseapp.com",
+  "messagingSenderId": "370163727149"
 };
 
 // Initialize Firebase
