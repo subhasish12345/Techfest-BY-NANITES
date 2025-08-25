@@ -99,14 +99,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(userCredential.user, { displayName });
+      
       const newUser: UserData = {
         uid: userCredential.user.uid,
         email,
         displayName,
         profile: 'I am a student interested in technology and innovation.',
         registeredEvents: [],
-        role: 'user',
+        role: email === 'admin@gmail.com' ? 'admin' : 'user', // Assign admin role
       };
+
       await setDoc(doc(db, "users", userCredential.user.uid), newUser);
       setUser(userCredential.user);
       setUserData(newUser);
