@@ -68,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         setUserData(null);
       }
+      setError(null); // Clear errors on auth state change
       setLoading(false);
     });
 
