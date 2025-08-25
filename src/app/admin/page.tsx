@@ -1,8 +1,26 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart2, Users, Calendar } from "lucide-react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
-export default function AdminDashboardPage() {
+async function getAnalytics() {
+    const usersSnapshot = await getDocs(collection(db, "users"));
+    const eventsSnapshot = await getDocs(collection(db, "events"));
+
+    const totalUsers = usersSnapshot.size;
+    const totalEvents = eventsSnapshot.size;
+
+    // Placeholder for more complex analytics
+    const engagementRate = "65.8%";
+
+    return { totalUsers, totalEvents, engagementRate };
+}
+
+
+export default async function AdminDashboardPage() {
+  const { totalUsers, totalEvents, engagementRate } = await getAnalytics();
+
   return (
     <div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -12,8 +30,8 @@ export default function AdminDashboardPage() {
                 <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">1,234</div>
-                <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+                <div className="text-2xl font-bold">{totalUsers}</div>
+                <p className="text-xs text-muted-foreground">Total users signed up</p>
             </CardContent>
         </Card>
         <Card>
@@ -22,8 +40,8 @@ export default function AdminDashboardPage() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">25</div>
-                <p className="text-xs text-muted-foreground">3 new events added this week</p>
+                <div className="text-2xl font-bold">{totalEvents}</div>
+                <p className="text-xs text-muted-foreground">Total events created</p>
             </CardContent>
         </Card>
         <Card>
@@ -32,7 +50,7 @@ export default function AdminDashboardPage() {
                 <BarChart2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">65.8%</div>
+                <div className="text-2xl font-bold">{engagementRate}</div>
                 <p className="text-xs text-muted-foreground">Average across all events</p>
             </CardContent>
         </Card>
