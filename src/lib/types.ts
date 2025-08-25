@@ -60,7 +60,12 @@ export const eventCategories = {
     "Entertainment",
   ],
   cultural: [
-    "Cultural Fest"
+    "Cultural Fest",
+    "Live Music & Band Performances",
+    "Dance Competitions",
+    "Stand-up Comedy & Open Mic",
+    "Fashion Show",
+    "DJ Night & Electronic Music",
   ]
 };
 
@@ -78,4 +83,5 @@ export interface UserData {
   profile: string;
   registeredEvents: string[];
   role?: 'admin' | 'user';
+  profilePhoto?: string;
 }
