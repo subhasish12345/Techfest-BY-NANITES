@@ -1,9 +1,10 @@
+
 "use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Rocket, Code, LogOut, User } from "lucide-react";
+import { Menu, Rocket, Code, LogOut, User, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 const navLinks = [
@@ -13,7 +14,7 @@ const navLinks = [
 ];
 
 export function Header() {
-  const { user, loading, logout } = useAuth();
+  const { user, userData, loading, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -35,6 +36,12 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+           {userData?.role === 'admin' && (
+             <Link href="/admin" className="text-sm font-medium text-accent transition-colors hover:text-primary flex items-center gap-1">
+                <Shield className="h-4 w-4" />
+                Admin
+             </Link>
+           )}
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
@@ -87,6 +94,12 @@ export function Header() {
                     {link.label}
                   </Link>
                 ))}
+                 {userData?.role === 'admin' && (
+                    <Link href="/admin" className="text-lg font-medium text-accent hover:text-primary flex items-center gap-2">
+                        <Shield className="h-5 w-5" />
+                        Admin
+                    </Link>
+                 )}
               </nav>
               <div className="flex flex-col gap-4">
                 {loading ? null : user ? (

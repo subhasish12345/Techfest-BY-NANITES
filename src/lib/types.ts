@@ -53,3 +53,12 @@ export const eventCategoriesList = [
   ...eventCategories["non-technical"],
   ...eventCategories.cultural,
 ];
+
+export interface UserData {
+  uid: string;
+  email: string;
+  displayName: string;
+  profile: string;
+  registeredEvents: string[];
+  role?: 'admin' | 'user';
+}

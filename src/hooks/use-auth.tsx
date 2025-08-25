@@ -20,14 +20,7 @@ import {
 import { FirebaseError } from "firebase/app";
 import { doc, setDoc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-
-export interface UserData {
-  uid: string;
-  email: string;
-  displayName: string;
-  profile: string;
-  registeredEvents: string[];
-}
+import type { UserData } from "@/lib/types";
 
 interface AuthContextType {
   user: User | null;
@@ -66,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 displayName: user.displayName || user.email!.split('@')[0],
                 profile: 'I am a student interested in technology and innovation.',
                 registeredEvents: [],
+                role: 'user',
             };
             await setDoc(userDocRef, newUser);
             setUserData(newUser);
@@ -110,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         displayName,
         profile: 'I am a student interested in technology and innovation.',
         registeredEvents: [],
+        role: 'user',
       };
       await setDoc(doc(db, "users", userCredential.user.uid), newUser);
       setUser(userCredential.user);
