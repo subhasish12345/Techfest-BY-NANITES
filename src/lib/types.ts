@@ -1,4 +1,7 @@
+
 import {z} from 'zod';
+import { Timestamp } from 'firebase/firestore';
+
 
 export interface Event {
   id: string;
@@ -45,8 +48,14 @@ export interface ScheduleItem {
 export interface Update {
   id: string;
   message: string;
-  timestamp: string;
+  timestamp: Timestamp;
 }
+
+export const updateSchema = z.object({
+    message: z.string().min(10, 'Update message must be at least 10 characters long.')
+})
+export type UpdateFormData = z.infer<typeof updateSchema>;
+
 
 export const eventCategories = {
   technical: [
@@ -61,19 +70,17 @@ export const eventCategories = {
   ],
   cultural: [
     "Cultural Fest",
-    "Live Music & Band Performances",
-    "Dance Competitions",
-    "Stand-up Comedy & Open Mic",
-    "Fashion Show",
-    "DJ Night & Electronic Music",
   ]
 };
 
-
 export const eventCategoriesList = [
-  ...eventCategories.technical,
-  ...eventCategories["non-technical"],
-  ...eventCategories.cultural,
+    "Programming & Development",
+    "Hardware & Innovation",
+    "Design & Creativity",
+    "Creative Arts",
+    "Interactive Competitions",
+    "Entertainment",
+    "Cultural Fest"
 ];
 
 export interface UserData {
