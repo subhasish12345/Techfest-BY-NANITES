@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
        if (e instanceof FirebaseError && e.code === 'auth/invalid-credential') {
         setError("Invalid email or password. Please try again.");
       } else {
-        setError(e.message);
+        setError("An unknown error occurred. Please try again.");
       }
       console.error(e);
     } finally {
@@ -111,7 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserData(newUser);
       router.push("/dashboard");
     } catch (e: any) {
-      setError(e.message);
+      if (e instanceof FirebaseError && e.code === 'auth/email-already-in-use') {
+        setError("This email is already registered. Please log in or use a different email.");
+      } else {
+        setError("An unknown error occurred during sign up. Please try again.");
+      }
       console.error(e);
     } finally {
       setLoading(false);
