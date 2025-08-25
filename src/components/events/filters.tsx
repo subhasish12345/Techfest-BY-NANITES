@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -67,7 +68,7 @@ export function Filters({ allEvents, setFilteredEvents }: FiltersProps) {
           className="pl-10"
         />
       </div>
-      <Select value={type} onValuecha/nge={setType}>
+      <Select value={type} onValueChange={setType}>
         <SelectTrigger>
           <SelectValue placeholder="Filter by type" />
         </SelectTrigger>
