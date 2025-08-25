@@ -1,3 +1,5 @@
+
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Rocket } from "lucide-react";
 import { CountdownTimer } from "./countdown-timer";
@@ -32,12 +34,16 @@ export function Hero() {
           <CountdownTimer targetDate={festDate} />
         </div>
         <div className="mt-10 flex items-center justify-center gap-x-6">
-          <Button size="lg" className="glow-shadow">
-            Register Now
-            <Rocket className="ml-2 h-5 w-5" />
-          </Button>
-          <Button size="lg" variant="link" className="text-primary">
-            View Events &rarr;
+            <Button size="lg" className="glow-shadow" asChild>
+                <Link href="/auth?form=signup">
+                    Register Now
+                    <Rocket className="ml-2 h-5 w-5" />
+                </Link>
+            </Button>
+            <Button size="lg" variant="link" className="text-primary" asChild>
+                <Link href="/events">
+                    View Events &rarr;
+                </Link>
           </Button>
         </div>
       </div>
