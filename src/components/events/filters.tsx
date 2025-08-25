@@ -22,6 +22,7 @@ export function Filters({ allEvents, setFilteredEvents }: FiltersProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("all");
   const [day, setDay] = useState("all");
+  const [type, setType] = useState("all");
 
   const applyFilters = useCallback(() => {
     let events = allEvents;
@@ -35,22 +36,26 @@ export function Filters({ allEvents, setFilteredEvents }: FiltersProps) {
     if (category !== "all") {
       events = events.filter((event) => event.category === category);
     }
+    
+    if (type !== "all") {
+        events = events.filter((event) => event.type === type);
+    }
 
     if (day !== "all") {
       events = events.filter((event) => event.date.includes(day));
     }
     
     setFilteredEvents(events);
-  }, [searchTerm, category, day, allEvents, setFilteredEvents]);
+  }, [searchTerm, category, day, type, allEvents, setFilteredEvents]);
 
 
   useEffect(() => {
     applyFilters();
-  }, [searchTerm, category, day, applyFilters]);
+  }, [searchTerm, category, day, type, applyFilters]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center p-4 rounded-lg bg-card border border-primary/20">
-      <div className="relative">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-4 rounded-lg bg-card border border-primary/20">
+      <div className="relative md:col-span-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="text"
@@ -58,10 +63,22 @@ export function Filters({ allEvents, setFilteredEvents }: FiltersProps) {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
+          suppressHydrationWarning
         />
       </div>
+      <Select value={type} onValueChange={setType}>
+        <SelectTrigger suppressHydrationWarning>
+          <SelectValue placeholder="Filter by type" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Types</SelectItem>
+          <SelectItem value="technical">Technical</SelectItem>
+          <SelectItem value="non-technical">Non-Technical</SelectItem>
+          <SelectItem value="cultural">Cultural</SelectItem>
+        </SelectContent>
+      </Select>
       <Select value={category} onValueChange={setCategory}>
-        <SelectTrigger>
+        <SelectTrigger suppressHydrationWarning>
           <SelectValue placeholder="Filter by category" />
         </SelectTrigger>
         <SelectContent>
@@ -74,14 +91,13 @@ export function Filters({ allEvents, setFilteredEvents }: FiltersProps) {
         </SelectContent>
       </Select>
       <Select value={day} onValueChange={setDay}>
-        <SelectTrigger>
+        <SelectTrigger suppressHydrationWarning>
           <SelectValue placeholder="Filter by day" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Days</SelectItem>
           <SelectItem value="Day 1">Day 1</SelectItem>
           <SelectItem value="Day 2">Day 2</SelectItem>
-          <SelectItem value="Day 3">Day 3</SelectItem>
         </SelectContent>
       </Select>
     </div>

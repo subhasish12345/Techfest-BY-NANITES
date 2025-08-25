@@ -8,6 +8,7 @@ export interface Event {
   time: string;
   rules: string[];
   prizes: string[];
+  type: "technical" | "non-technical" | "cultural";
 }
 
 export interface Sponsor {
@@ -29,13 +30,25 @@ export interface Update {
   timestamp: string;
 }
 
+export const eventCategories = {
+  technical: [
+    "Programming & Development",
+    "Hardware & Innovation",
+    "Design & Creativity",
+  ],
+  "non-technical": [
+    "Creative Arts",
+    "Interactive Competitions",
+    "Entertainment",
+  ],
+  cultural: [
+    "Cultural Fest"
+  ]
+};
+
+
 export const eventCategoriesList = [
-  "AI & ML",
-  "Web Development",
-  "Cybersecurity",
-  "Hardware & IoT",
-  "Competitive Programming",
-  "Gaming",
-  "Robotics",
-  "UI/UX Design",
+  ...eventCategories.technical,
+  ...eventCategories["non-technical"],
+  ...eventCategories.cultural,
 ];
