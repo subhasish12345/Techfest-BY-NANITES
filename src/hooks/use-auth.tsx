@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -53,19 +54,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       if (user) {
         setUser(user);
-        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
           setUserData(userDoc.data() as UserData);
         } else {
-            // Create user doc if it doesn't exist
+            // Create user doc if it doesn't exist, which can happen with social logins
             const newUser: UserData = {
                 uid: user.uid,
                 email: user.email!,
-                displayName: user.displayName || '',
+                displayName: user.displayName || user.email!.split('@')[0],
                 profile: 'I am a student interested in technology and innovation.',
                 registeredEvents: [],
             };
-            await setDoc(doc(db, "users", user.uid), newUser);
+            await setDoc(userDocRef, newUser);
             setUserData(newUser);
         }
       } else {
@@ -135,9 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerForEvent = async (eventId: string) => {
     if (!user) {
-      setError("You must be logged in to register for an event.");
-      router.push('/auth');
-      return;
+      throw new Error("You must be logged in to register for an event.");
     }
     setLoading(true);
     try {
@@ -145,14 +145,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await updateDoc(userRef, {
         registeredEvents: arrayUnion(eventId)
       });
-      // refetch user data
+      // refetch user data to update UI instantly
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
         setUserData(userDoc.data() as UserData);
       }
     } catch (e:any) {
-      setError(e.message);
       console.error(e);
+      throw new Error(e.message || "An unknown error occurred during registration.");
     } finally {
         setLoading(false);
     }

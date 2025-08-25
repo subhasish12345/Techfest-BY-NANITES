@@ -1,5 +1,9 @@
+
 "use client";
 
+import { useState, useEffect } from "react";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import {
   Card,
   CardContent,
@@ -16,16 +20,70 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { events as allEvents } from "@/lib/data";
 import { useAuth } from "@/hooks/use-auth";
 import type { Event } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function MySchedule() {
-  const { userData } = useAuth();
+  const { userData, loading: authLoading } = useAuth();
+  const [registeredEvents, setRegisteredEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const registeredEvents: Event[] = userData?.registeredEvents
-    ? userData.registeredEvents.map(eventId => allEvents.find(event => event.id === eventId)).filter((event): event is Event => !!event)
-    : [];
+  useEffect(() => {
+    const fetchRegisteredEvents = async () => {
+      if (!userData?.registeredEvents || userData.registeredEvents.length === 0) {
+        setRegisteredEvents([]);
+        setLoading(false);
+        return;
+      }
+      
+      setLoading(true);
+      try {
+        const eventsData: Event[] = [];
+        // Firestore 'in' query is limited to 10 items. We fetch docs one by one.
+        // For larger scale, a different approach might be needed.
+        for (const eventId of userData.registeredEvents) {
+          const eventDocRef = doc(db, 'events', eventId);
+          const eventDoc = await getDoc(eventDocRef);
+          if(eventDoc.exists()){
+            eventsData.push({ id: eventDoc.id, ...eventDoc.data() } as Event);
+          }
+        }
+        setRegisteredEvents(eventsData);
+      } catch (error) {
+        console.error("Error fetching registered events: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (!authLoading) {
+        fetchRegisteredEvents();
+    }
+  }, [userData, authLoading]);
+
+  const renderSkeleton = () => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+            <TableHead>Event</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Date & Time</TableHead>
+            <TableHead>Status</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {[...Array(3)].map((_, i) => (
+            <TableRow key={i}>
+                <TableCell><Skeleton className="h-5 w-3/4" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-1/2" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-1/2" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-1/4" /></TableCell>
+            </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
 
   return (
     <Card className="bg-card border-primary/20">
@@ -36,7 +94,7 @@ export function MySchedule() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {registeredEvents.length > 0 ? (
+        {loading ? renderSkeleton() : registeredEvents.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
