@@ -20,14 +20,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import type { Event } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QrCode } from "lucide-react";
+import { QrCodeDialog } from "./qr-code-dialog";
 
 export function MySchedule() {
-  const { userData, loading: authLoading } = useAuth();
+  const { user, userData, loading: authLoading } = useAuth();
   const [registeredEvents, setRegisteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [qrCodeData, setQrCodeData] = useState<{ eventTitle: string, qrValue: string } | null>(null);
 
   useEffect(() => {
     const fetchRegisteredEvents = async () => {
@@ -62,6 +66,12 @@ export function MySchedule() {
     }
   }, [userData, authLoading]);
 
+  const handleShowQrCode = (event: Event) => {
+    if (!user) return;
+    const qrValue = JSON.stringify({ userId: user.uid, eventId: event.id });
+    setQrCodeData({ eventTitle: event.title, qrValue });
+  };
+
   const renderSkeleton = () => (
     <Table>
       <TableHeader>
@@ -69,7 +79,7 @@ export function MySchedule() {
             <TableHead>Event</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Date & Time</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Ticket</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -78,7 +88,7 @@ export function MySchedule() {
                 <TableCell><Skeleton className="h-5 w-3/4" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-1/2" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-1/2" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-1/4" /></TableCell>
+                <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
             </TableRow>
         ))}
       </TableBody>
@@ -86,11 +96,12 @@ export function MySchedule() {
   );
 
   return (
+    <>
     <Card className="bg-card border-primary/20">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">My Registered Events</CardTitle>
         <CardDescription>
-          Your personalized timeline for TechFest 2024.
+          Your personalized timeline for TechFest 2024. Show the QR code for entry.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -101,7 +112,7 @@ export function MySchedule() {
                 <TableHead>Event</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Date & Time</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ticket</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -112,8 +123,11 @@ export function MySchedule() {
                       <Badge variant="outline" className="border-accent text-accent font-code">{event.category}</Badge>
                   </TableCell>
                   <TableCell className="font-code">{event.date}, {event.time}</TableCell>
-                  <TableCell>
-                    <Badge className="bg-accent text-accent-foreground">Registered</Badge>
+                  <TableCell className="text-right">
+                    <Button variant="outline" size="sm" onClick={() => handleShowQrCode(event)}>
+                        <QrCode className="mr-2 h-4 w-4" />
+                        Show QR Code
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -124,5 +138,14 @@ export function MySchedule() {
         )}
       </CardContent>
     </Card>
+    {qrCodeData && (
+        <QrCodeDialog 
+            isOpen={!!qrCodeData}
+            onClose={() => setQrCodeData(null)}
+            eventTitle={qrCodeData.eventTitle}
+            qrValue={qrCodeData.qrValue}
+        />
+    )}
+    </>
   );
 }
