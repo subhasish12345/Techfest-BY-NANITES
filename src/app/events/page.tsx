@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,13 +8,28 @@ import { EventCard } from "@/components/events/event-card";
 import { Filters } from "@/components/events/filters";
 import type { Event } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { events as dummyEvents } from "@/lib/data";
 
 async function getEvents(): Promise<Event[]> {
-    const eventsCollection = collection(db, 'events');
+  try {
+    const eventsCollection = collection(db, "events");
     const eventSnapshot = await getDocs(eventsCollection);
-    const eventList = eventSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
-    return eventList;
+    
+    if (!eventSnapshot.empty) {
+      const eventList = eventSnapshot.docs.map(
+        (doc) => ({ id: doc.id, ...doc.data() } as Event)
+      );
+      return eventList;
+    }
+  } catch (error) {
+    console.error("Error fetching events from Firestore:", error);
+  }
+  
+  // Fallback to dummy data if Firestore is empty or fails
+  console.log("Firestore is empty or failed to fetch, using fallback dummy data.");
+  return dummyEvents;
 }
+
 
 export default function EventsPage() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
