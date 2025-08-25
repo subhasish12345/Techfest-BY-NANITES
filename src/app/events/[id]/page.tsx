@@ -1,28 +1,70 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
-import { events } from '@/lib/data';
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import type { Event } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, Clock, Award, Users, FileText, Loader2, CheckCircle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 export default function EventDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { user, userData, registerForEvent, loading } = useAuth();
+  const { user, userData, registerForEvent, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const id = params.id as string;
+  
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const event: Event | undefined = events.find((e) => e.id === id);
+  useEffect(() => {
+    if (!id) return;
+    const fetchEvent = async () => {
+        setLoading(true);
+        const eventDocRef = doc(db, 'events', id);
+        const eventDoc = await getDoc(eventDocRef);
+        if (eventDoc.exists()) {
+            setEvent({ id: eventDoc.id, ...eventDoc.data() } as Event);
+        } else {
+            console.error("No such document!");
+        }
+        setLoading(false);
+    };
+    fetchEvent();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid md:grid-cols-5 gap-8 lg:gap-12">
+            <div className="md:col-span-3">
+                <Skeleton className="h-96 w-full rounded-lg" />
+                <div className="mt-8">
+                    <Skeleton className="h-6 w-1/4 mb-4" />
+                    <Skeleton className="h-12 w-3/4 mb-4" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-5/6 mt-2" />
+                </div>
+            </div>
+            <div className="md:col-span-2">
+                 <Skeleton className="h-96 w-full rounded-lg" />
+            </div>
+        </div>
+      </div>
+    )
+  }
 
   if (!event) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p>Event not found.</p>
+      <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+        <p className="text-2xl text-muted-foreground">Event not found.</p>
       </div>
     );
   }
@@ -106,8 +148,8 @@ export default function EventDetailPage() {
                     Registered
                 </Button>
               ) : (
-                <Button size="lg" className="w-full glow-shadow" onClick={handleRegister} disabled={loading}>
-                    {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 'Register for this Event'}
+                <Button size="lg" className="w-full glow-shadow" onClick={handleRegister} disabled={authLoading}>
+                    {authLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 'Register for this Event'}
                 </Button>
               )}
             </div>

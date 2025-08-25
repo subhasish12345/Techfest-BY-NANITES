@@ -9,6 +9,7 @@ export interface Event {
   rules: string[];
   prizes: string[];
   type: "technical" | "non-technical" | "cultural";
+  status?: "upcoming" | "ongoing" | "completed";
 }
 
 export interface Sponsor {

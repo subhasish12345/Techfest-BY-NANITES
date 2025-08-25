@@ -25,7 +25,7 @@ export function Filters({ allEvents, setFilteredEvents }: FiltersProps) {
   const [type, setType] = useState("all");
 
   const applyFilters = useCallback(() => {
-    let events = allEvents;
+    let events = [...allEvents];
 
     if (searchTerm) {
       events = events.filter((event) =>
@@ -42,7 +42,9 @@ export function Filters({ allEvents, setFilteredEvents }: FiltersProps) {
     }
 
     if (day !== "all") {
-      events = events.filter((event) => event.date.includes(day));
+      // This logic might need adjustment if your date format changes
+      const dayNumber = day.split(" ")[1];
+      events = events.filter((event) => event.date.includes(`Day ${dayNumber}`));
     }
     
     setFilteredEvents(events);
@@ -63,11 +65,10 @@ export function Filters({ allEvents, setFilteredEvents }: FiltersProps) {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
-          suppressHydrationWarning
         />
       </div>
-      <Select value={type} onValueChange={setType}>
-        <SelectTrigger suppressHydrationWarning>
+      <Select value={type} onValuecha/nge={setType}>
+        <SelectTrigger>
           <SelectValue placeholder="Filter by type" />
         </SelectTrigger>
         <SelectContent>
@@ -78,7 +79,7 @@ export function Filters({ allEvents, setFilteredEvents }: FiltersProps) {
         </SelectContent>
       </Select>
       <Select value={category} onValueChange={setCategory}>
-        <SelectTrigger suppressHydrationWarning>
+        <SelectTrigger>
           <SelectValue placeholder="Filter by category" />
         </SelectTrigger>
         <SelectContent>
@@ -91,7 +92,7 @@ export function Filters({ allEvents, setFilteredEvents }: FiltersProps) {
         </SelectContent>
       </Select>
       <Select value={day} onValueChange={setDay}>
-        <SelectTrigger suppressHydrationWarning>
+        <SelectTrigger>
           <SelectValue placeholder="Filter by day" />
         </SelectTrigger>
         <SelectContent>

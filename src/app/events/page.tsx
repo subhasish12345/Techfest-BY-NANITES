@@ -1,13 +1,35 @@
 "use client";
 
-import { useState } from "react";
-import { events } from "@/lib/data";
+import { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { EventCard } from "@/components/events/event-card";
 import { Filters } from "@/components/events/filters";
 import type { Event } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+
+async function getEvents(): Promise<Event[]> {
+    const eventsCollection = collection(db, 'events');
+    const eventSnapshot = await getDocs(eventsCollection);
+    const eventList = eventSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+    return eventList;
+}
 
 export default function EventsPage() {
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>(events);
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      const events = await getEvents();
+      setAllEvents(events);
+      setFilteredEvents(events);
+      setLoading(false);
+    };
+    fetchEvents();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -19,9 +41,21 @@ export default function EventsPage() {
           Discover your next challenge. Filter by category, day, or search by name.
         </p>
       </div>
-      <Filters allEvents={events} setFilteredEvents={setFilteredEvents} />
+      <Filters allEvents={allEvents} setFilteredEvents={setFilteredEvents} />
 
-      {filteredEvents.length > 0 ? (
+      {loading ? (
+        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [grid-auto-rows:auto]">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="flex flex-col space-y-3">
+              <Skeleton className="h-[200px] w-full rounded-lg" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredEvents.length > 0 ? (
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [grid-auto-rows:auto]">
           {filteredEvents.map((event) => (
             <EventCard key={event.id} event={event} />
