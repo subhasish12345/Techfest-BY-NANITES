@@ -1,3 +1,5 @@
+import {z} from 'zod';
+
 export interface Event {
   id: string;
   title: string;
@@ -11,6 +13,21 @@ export interface Event {
   type: "technical" | "non-technical" | "cultural";
   status?: "upcoming" | "ongoing" | "completed";
 }
+
+export const eventSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  category: z.string().min(1, 'Category is required'),
+  type: z.enum(['technical', 'non-technical', 'cultural']),
+  date: z.string().min(1, 'Date is required'),
+  time: z.string().min(1, 'Time is required'),
+  image: z.string().url('Must be a valid URL'),
+  rules: z.array(z.string()).min(1, 'At least one rule is required'),
+  prizes: z.array(z.string()).min(1, 'At least one prize is required'),
+});
+
+export type EventFormData = z.infer<typeof eventSchema>;
+
 
 export interface Sponsor {
   id: string;
