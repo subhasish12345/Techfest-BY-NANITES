@@ -9,7 +9,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -27,6 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 
+// Schemas are defined outside the component to prevent re-creation on every render.
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(1, { message: "Password is required." }),
@@ -38,8 +38,8 @@ const signupSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
 
-
-function AuthForm() {
+// The component that uses useSearchParams must be wrapped in a <Suspense>
+function AuthPageContent() {
   const { login, signup, loading, error } = useAuth();
   const searchParams = useSearchParams();
   const initialFormType = searchParams.get('form') === 'signup' ? 'signup' : 'login';
@@ -151,8 +151,8 @@ function AuthForm() {
 
 export default function AuthPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <AuthForm />
+        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+            <AuthPageContent />
         </Suspense>
     )
 }
