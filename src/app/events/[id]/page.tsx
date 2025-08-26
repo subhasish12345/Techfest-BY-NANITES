@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, Clock, Award, Users, FileText, Loader2, CheckCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { events as dummyEvents } from '@/lib/data';
 
 
 export default function EventDetailPage() {
@@ -29,13 +30,31 @@ export default function EventDetailPage() {
     if (!id) return;
     const fetchEvent = async () => {
         setLoading(true);
-        const eventDocRef = doc(db, 'events', id);
-        const eventDoc = await getDoc(eventDocRef);
-        if (eventDoc.exists()) {
-            setEvent({ id: eventDoc.id, ...eventDoc.data() } as Event);
-        } else {
+        let foundEvent: Event | null = null;
+        
+        try {
+            const eventDocRef = doc(db, 'events', id);
+            const eventDoc = await getDoc(eventDocRef);
+            if (eventDoc.exists()) {
+                foundEvent = { id: eventDoc.id, ...eventDoc.data() } as Event;
+            }
+        } catch (error) {
+            console.log("Firestore fetch failed, will check fallback data.", error);
+        }
+
+        if (!foundEvent) {
+            const fallbackEvent = dummyEvents.find(e => e.id === id);
+            if (fallbackEvent) {
+                foundEvent = fallbackEvent;
+            }
+        }
+        
+        setEvent(foundEvent);
+        
+        if (!foundEvent) {
             console.error("No such document!");
         }
+
         setLoading(false);
     };
     fetchEvent();
@@ -174,4 +193,3 @@ export default function EventDetailPage() {
     </div>
   );
 }
-
