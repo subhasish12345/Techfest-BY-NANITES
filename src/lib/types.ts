@@ -113,3 +113,8 @@ export interface UserData {
   section?: string;
   mobileNo?: string;
 }
+
+export interface GalleryImage {
+    src: string;
+    alt: string;
+}
