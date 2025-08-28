@@ -19,7 +19,7 @@ import {
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { doc, setDoc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import type { UserData } from "@/lib/types";
 
 interface AuthContextType {
@@ -31,6 +31,7 @@ interface AuthContextType {
   signup: (email: string, pass: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
   registerForEvent: (eventId: string) => Promise<void>;
+  updateUserProfile: (profileData: Partial<UserData>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,6 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 profile: 'I am a student interested in technology and innovation.',
                 registeredEvents: [],
                 role: 'user',
+                regNo: '',
+                degree: '',
+                branch: '',
+                semester: '',
+                section: '',
+                mobileNo: '',
             };
             await setDoc(userDocRef, newUser);
             setUserData(newUser);
@@ -113,6 +120,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile: 'I am a student interested in technology and innovation.',
         registeredEvents: [],
         role: email === 'admin@gmail.com' ? 'admin' : 'user', // Assign admin role
+        regNo: '',
+        degree: '',
+        branch: '',
+        semester: '',
+        section: '',
+        mobileNo: '',
       };
 
       await setDoc(doc(db, "users", userCredential.user.uid), newUser);
@@ -172,8 +185,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const updateUserProfile = async (profileData: Partial<UserData>) => {
+    if (!user) {
+        throw new Error("You must be logged in to update your profile.");
+    }
+    setLoading(true);
+    try {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, profileData);
+        const updatedUserDoc = await getDoc(userRef);
+        if (updatedUserDoc.exists()) {
+            setUserData(updatedUserDoc.data() as UserData);
+        }
+    } catch(e: any) {
+        console.error("Profile Update Error:", e);
+        throw new Error(e.message || "An unknown error occurred while updating the profile.");
+    } finally {
+        setLoading(false);
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, userData, loading, error, login, signup, logout, registerForEvent }}>
+    <AuthContext.Provider value={{ user, userData, loading, error, login, signup, logout, registerForEvent, updateUserProfile }}>
       {children}
     </AuthContext.Provider>
   );

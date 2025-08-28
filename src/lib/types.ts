@@ -83,6 +83,21 @@ export const eventCategoriesList = [
     "Cultural Fest"
 ];
 
+export const userProfileSchema = z.object({
+  displayName: z.string().min(1, 'Display name is required'),
+  email: z.string().email(),
+  regNo: z.string().optional(),
+  degree: z.string().optional(),
+  branch: z.string().optional(),
+  semester: z.string().optional(),
+  section: z.string().optional(),
+  mobileNo: z.string().optional(),
+  profile: z.string().optional(),
+  profilePhoto: z.string().url().optional().or(z.literal('')),
+});
+
+export type UserProfileFormData = z.infer<typeof userProfileSchema>;
+
 export interface UserData {
   uid: string;
   email: string;
@@ -91,4 +106,10 @@ export interface UserData {
   registeredEvents: string[];
   role?: 'admin' | 'user';
   profilePhoto?: string;
+  regNo?: string;
+  degree?: string;
+  branch?: string;
+  semester?: string;
+  section?: string;
+  mobileNo?: string;
 }
