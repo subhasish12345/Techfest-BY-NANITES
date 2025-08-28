@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent } from "@/components/ui/sidebar";
-import { Home, Calendar, Users, Settings, Rss } from "lucide-react";
+import { Home, Calendar, Users, Settings, Rss, Loader2 } from "lucide-react";
 import { ProfileHeader } from "@/components/dashboard/profile-header";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {

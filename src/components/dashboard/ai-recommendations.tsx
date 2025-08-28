@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -31,7 +32,7 @@ export function AiRecommendations() {
     if (userData?.profile) {
       setUserProfile(userData.profile);
     } else {
-        setUserProfile("I am a student interested in technology and innovation.");
+        setUserProfile("I am a student interested in technology, programming, and design.");
     }
   }, [userData]);
 

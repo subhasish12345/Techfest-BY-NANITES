@@ -16,7 +16,7 @@ const firebaseConfig = {
 };
 
 if (!firebaseConfig.apiKey) {
-    throw new Error('Missing Firebase API Key. Please set NEXT_PUBLIC_FIREBASE_API_KEY in your .env file.');
+    console.log('Missing Firebase API Key. Please set NEXT_PUBLIC_FIREBASE_API_KEY in your .env file.');
 }
 
 
