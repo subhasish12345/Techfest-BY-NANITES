@@ -31,7 +31,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet" />
       </head>
       <body
-        className={`${inter.variable} ${orbitron.variable} ${jetbrainsMono.variable} font-body antialiased`}
+        className={`${inter.variable} ${orbitron.variable} ${jetbrainsMono.variable} font-body antialiased bg-gradient-animated`}
       >
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
