@@ -86,9 +86,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
                 setError("Invalid email or password. Please try again.");
             } else if (e.code === 'auth/api-key-not-valid') {
-                setError("Firebase configuration error. Please contact the administrator.");
+                setError("Firebase configuration error. Please check your API key.");
             } else {
-                setError("An unknown error occurred. Please try again.");
+                setError("An unknown error occurred. Please try again later.");
             }
        } else {
          setError("An unexpected error occurred. Please try again.");
@@ -124,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (e.code === 'auth/email-already-in-use') {
             setError("This email is already registered. Please log in or use a different email.");
         } else if (e.code === 'auth/api-key-not-valid') {
-            setError("Firebase configuration error. Please contact the administrator.");
+            setError("Firebase configuration error. Please check your API key.");
         } else {
             setError("An unknown error occurred during sign up. Please try again.");
         }

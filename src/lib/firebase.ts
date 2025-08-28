@@ -13,8 +13,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-if (!firebaseConfig.apiKey) {
-    console.error('Missing Firebase API Key. Please set NEXT_PUBLIC_FIREBASE_API_KEY in your .env file.');
+if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY_HERE") {
+    console.error('Firebase API Key is missing or is still a placeholder. Please set NEXT_PUBLIC_FIREBASE_API_KEY in your .env file.');
 }
 
 // Initialize Firebase
