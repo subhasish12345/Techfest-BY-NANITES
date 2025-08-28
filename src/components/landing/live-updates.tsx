@@ -22,6 +22,9 @@ export function LiveUpdates() {
       });
       setUpdates(updatesData);
       setLoading(false);
+    }, (error) => {
+      console.error("LiveUpdates Error: ", error);
+      setLoading(false);
     });
 
     return () => unsubscribe();

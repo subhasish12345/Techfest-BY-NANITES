@@ -19,8 +19,8 @@ import {
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { doc, setDoc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import type { UserData } from "@/lib/types";
+import { auth, db } from "@/lib/firebase";
+import type { UserData, UserProfileFormData } from "@/lib/types";
 
 interface AuthContextType {
   user: User | null;
@@ -31,7 +31,7 @@ interface AuthContextType {
   signup: (email: string, pass: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
   registerForEvent: (eventId: string) => Promise<void>;
-  updateUserProfile: (profileData: Partial<UserData>) => Promise<void>;
+  updateUserProfile: (profileData: Partial<UserProfileFormData>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (userDoc.exists()) {
           setUserData(userDoc.data() as UserData);
         } else {
-            // Create user doc if it doesn't exist, which can happen with social logins
+            // This case can be hit if a user is created in auth but the doc creation fails.
             const newUser: UserData = {
                 uid: user.uid,
                 email: user.email!,
@@ -67,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 semester: '',
                 section: '',
                 mobileNo: '',
+                profilePhoto: user.photoURL || '',
             };
             await setDoc(userDocRef, newUser);
             setUserData(newUser);
@@ -75,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         setUserData(null);
       }
-      setError(null); // Clear errors on auth state change
+      setError(null);
       setLoading(false);
     });
 
@@ -92,8 +93,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
        if (e instanceof FirebaseError) {
             if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
                 setError("Invalid email or password. Please try again.");
-            } else if (e.code === 'auth/api-key-not-valid') {
-                setError("Firebase configuration error. Please check your API key.");
             } else {
                 setError("An unknown error occurred. Please try again later.");
             }
@@ -119,13 +118,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         displayName,
         profile: 'I am a student interested in technology and innovation.',
         registeredEvents: [],
-        role: email === 'admin@gmail.com' ? 'admin' : 'user', // Assign admin role
+        role: email === 'admin@gmail.com' ? 'admin' : 'user',
         regNo: '',
         degree: '',
         branch: '',
         semester: '',
         section: '',
         mobileNo: '',
+        profilePhoto: '',
       };
 
       await setDoc(doc(db, "users", userCredential.user.uid), newUser);
@@ -136,8 +136,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (e instanceof FirebaseError) {
         if (e.code === 'auth/email-already-in-use') {
             setError("This email is already registered. Please log in or use a different email.");
-        } else if (e.code === 'auth/api-key-not-valid') {
-            setError("Firebase configuration error. Please check your API key.");
         } else {
             setError("An unknown error occurred during sign up. Please try again.");
         }
@@ -172,7 +170,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await updateDoc(userRef, {
         registeredEvents: arrayUnion(eventId)
       });
-      // refetch user data to update UI instantly
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
         setUserData(userDoc.data() as UserData);
@@ -185,13 +182,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const updateUserProfile = async (profileData: Partial<UserData>) => {
+  const updateUserProfile = async (profileData: Partial<UserProfileFormData>) => {
     if (!user) {
         throw new Error("You must be logged in to update your profile.");
     }
     setLoading(true);
     try {
         const userRef = doc(db, "users", user.uid);
+        
+        // Ensure displayName is updated in Auth if it changes
+        if (profileData.displayName && profileData.displayName !== user.displayName) {
+          await updateProfile(user, { displayName: profileData.displayName });
+        }
+        
         await updateDoc(userRef, profileData);
         const updatedUserDoc = await getDoc(userRef);
         if (updatedUserDoc.exists()) {
