@@ -1,11 +1,9 @@
 // Import the functions you need from the SDKs you need
-import {initializeApp, getApp, getApps} from 'firebase/app';
-import {getAuth} from 'firebase/auth';
-import {getFirestore} from 'firebase/firestore';
+import { initializeApp, getApp, getApps, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
-// For more information on how to get this, visit:
-// https://firebase.google.com/docs/web/setup#available-libraries
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -16,13 +14,22 @@ const firebaseConfig = {
 };
 
 if (!firebaseConfig.apiKey) {
-    console.log('Missing Firebase API Key. Please set NEXT_PUBLIC_FIREBASE_API_KEY in your .env file.');
+    console.error('Missing Firebase API Key. Please set NEXT_PUBLIC_FIREBASE_API_KEY in your .env file.');
 }
 
-
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
 
-export {app, auth, db};
+if (getApps().length === 0) {
+    app = initializeApp(firebaseConfig);
+} else {
+    app = getApp();
+}
+
+auth = getAuth(app);
+db = getFirestore(app);
+
+
+export { app, auth, db };

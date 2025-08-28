@@ -82,12 +82,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await signInWithEmailAndPassword(auth, email, pass);
       router.push("/dashboard");
     } catch (e: any) {
-       if (e instanceof FirebaseError && e.code === 'auth/invalid-credential') {
-        setError("Invalid email or password. Please try again.");
-      } else {
-        setError("An unknown error occurred. Please try again.");
-      }
-      console.error(e);
+       if (e instanceof FirebaseError) {
+            if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
+                setError("Invalid email or password. Please try again.");
+            } else if (e.code === 'auth/api-key-not-valid') {
+                setError("Firebase configuration error. Please contact the administrator.");
+            } else {
+                setError("An unknown error occurred. Please try again.");
+            }
+       } else {
+         setError("An unexpected error occurred. Please try again.");
+       }
+       console.error("Login Error:", e);
     } finally {
       setLoading(false);
     }
@@ -114,12 +120,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserData(newUser);
       router.push("/dashboard");
     } catch (e: any) {
-      if (e instanceof FirebaseError && e.code === 'auth/email-already-in-use') {
-        setError("This email is already registered. Please log in or use a different email.");
+      if (e instanceof FirebaseError) {
+        if (e.code === 'auth/email-already-in-use') {
+            setError("This email is already registered. Please log in or use a different email.");
+        } else if (e.code === 'auth/api-key-not-valid') {
+            setError("Firebase configuration error. Please contact the administrator.");
+        } else {
+            setError("An unknown error occurred during sign up. Please try again.");
+        }
       } else {
-        setError("An unknown error occurred during sign up. Please try again.");
+        setError("An unexpected error occurred. Please try again.");
       }
-      console.error(e);
+      console.error("Signup Error:", e);
     } finally {
       setLoading(false);
     }
