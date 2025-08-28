@@ -63,10 +63,10 @@ This project requires a Firebase project to handle authentication and data stora
 3.  In your new project, go to **Project Settings** (the gear icon).
 4.  In the "Your apps" card, click the **Web icon (`</>`)** to create a new web app.
 5.  Give your app a nickname and click **"Register app"**.
-6.  You will be shown a `firebaseConfig` object. Copy this object.
-7.  In the project root, create a new file named `.env` and paste your Firebase configuration into it. The file is already gitignored.
+6.  You will be shown a `firebaseConfig` object. Copy the values from this object.
+7.  In the project root, you will find a file named `.env`. Open it and replace the placeholder values with the ones you just copied from the Firebase console. The file is already gitignored.
 
-Your `.env` file should look like this:
+Your `.env` file should look like this (with your actual credentials):
 
 ```
 # Firebase Configuration
@@ -111,3 +111,4 @@ The application should now be running at [http://localhost:9002](http://localhos
 - `npm run lint`: Runs the linter to check for code quality issues.
 - `npm run genkit:dev`: Starts the Genkit development server for local AI flow testing.
 # Techfest-BY-NANITES
+```
