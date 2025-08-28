@@ -170,6 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await updateDoc(userRef, {
         registeredEvents: arrayUnion(eventId)
       });
+      // Refresh user data locally
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
         setUserData(userDoc.data() as UserData);
@@ -196,6 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         
         await updateDoc(userRef, profileData);
+        // Refresh user data locally
         const updatedUserDoc = await getDoc(userRef);
         if (updatedUserDoc.exists()) {
             setUserData(updatedUserDoc.data() as UserData);
