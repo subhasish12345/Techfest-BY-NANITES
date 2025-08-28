@@ -1,35 +1,29 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if a user is an admin
+    // Helper function to check for admin role
     function isAdmin() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Rules for the 'users' collection
-    match /users/{userId} {
-      // A user can only read or write their own document
-      allow read, write: if request.auth.uid == userId;
-    }
-
-    // Rules for the 'events' collection
+    // Events can be read by anyone, but only created/updated/deleted by an admin.
     match /events/{eventId} {
-      // Anyone can read events
       allow read: if true;
-      // Only admins can create, update, or delete events
       allow write: if isAdmin();
     }
 
-    // Rules for the 'updates' collection
+    // Users can only read/write their own data.
+    match /users/{userId} {
+      allow read, write: if request.auth.uid == userId || isAdmin();
+    }
+
+    // Updates can be read by anyone, but only created/deleted by an admin.
     match /updates/{updateId} {
-      // Anyone can read updates for the live feed
       allow read: if true;
-      // Only admins can create and delete updates
-      allow create, delete: if isAdmin();
-      // Updates are not designed to be edited
-      allow update: if false;
+      allow write: if isAdmin();
     }
   }
 }
