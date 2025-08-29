@@ -24,7 +24,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2 } from "lucide-react";
+import { Loader2, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 // Schemas are defined outside the component to prevent re-creation on every render.
 const loginSchema = z.object({
@@ -67,6 +69,8 @@ function AuthPageContent() {
         form.reset();
     };
 
+    const isPotentiallyAdmin = form.watch('email') === 'admin@gmail.com' && formType === 'login' && error;
+
     return (
         <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center p-4">
             <Card className="w-full max-w-md">
@@ -81,6 +85,15 @@ function AuthPageContent() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
+                    {isPotentiallyAdmin && (
+                         <Alert variant="default" className="mb-4 bg-blue-900/20 border-blue-500/50">
+                            <Info className="h-4 w-4 text-blue-400" />
+                            <AlertTitle className="text-blue-300">Admin Account</AlertTitle>
+                            <AlertDescription className="text-blue-400">
+                                It looks like you're trying to log in as an admin. Please use the <strong>Sign Up</strong> form to create the admin account first.
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             {formType === "signup" && (
@@ -124,7 +137,7 @@ function AuthPageContent() {
                                     </FormItem>
                                 )}
                             />
-                            {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+                            {error && !isPotentiallyAdmin && <p className="text-sm font-medium text-destructive">{error}</p>}
                             <Button type="submit" className="w-full" disabled={loading}>
                                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {formType === "login" ? "Log In" : "Sign Up"}
