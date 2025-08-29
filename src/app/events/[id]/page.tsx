@@ -186,7 +186,7 @@ export default function EventDetailPage() {
              <div className="bg-card p-6 rounded-lg border border-primary/20">
                 <h3 className="font-headline text-xl text-primary flex items-center gap-2 mb-4"><Award /> Prizes</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    {event.prizes.map((prize, i) => <li key={i}>{prize}</li>)}
+                    {event.prizes.map((prize, i) => <li key={i}><span className="font-bold">{prize.position}:</span> {prize.prize}</li>)}
                 </ul>
             </div>
        </div>

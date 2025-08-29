@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm, useFieldArray } from "react-hook-form";
@@ -63,7 +64,7 @@ export function EventForm({ event }: EventFormProps) {
       time: event?.time || "",
       image: event?.image || "",
       rules: event?.rules || [""],
-      prizes: event?.prizes || [""],
+      prizes: event?.prizes || [{ position: "", prize: "" }],
     },
   });
 
@@ -269,26 +270,42 @@ export function EventForm({ event }: EventFormProps) {
             </div>
              <div>
               <FormLabel>Prizes</FormLabel>
-               <div className="space-y-2 mt-2">
+               <div className="space-y-4 mt-2">
                 {prizesFields.map((field, index) => (
-                  <FormField
-                    key={field.id}
-                    control={form.control}
-                    name={`prizes.${index}`}
-                    render={({ field }) => (
-                      <FormItem className="flex items-center gap-2">
-                        <FormControl>
-                          <Input placeholder={`Prize ${index + 1}`} {...field} />
-                        </FormControl>
-                        <Button type="button" variant="destructive" size="icon" onClick={() => removePrize(index)}>
-                            <Trash2 />
-                        </Button>
-                      </FormItem>
-                    )}
-                  />
+                  <div key={field.id} className="flex items-end gap-2 p-2 border rounded-md">
+                     <FormField
+                        control={form.control}
+                        name={`prizes.${index}.position`}
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormLabel>Position</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., 1st Place" {...field} />
+                            </FormControl>
+                             <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                       <FormField
+                        control={form.control}
+                        name={`prizes.${index}.prize`}
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormLabel>Prize</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., Trophy + Certificate" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    <Button type="button" variant="destructive" size="icon" onClick={() => removePrize(index)}>
+                        <Trash2 />
+                    </Button>
+                  </div>
                 ))}
               </div>
-              <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendPrize("")}>
+              <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendPrize({ position: "", prize: "" })}>
                 Add Prize
               </Button>
             </div>

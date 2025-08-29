@@ -12,10 +12,15 @@ export interface Event {
   date: string;
   time: string;
   rules: string[];
-  prizes: string[];
+  prizes: { position: string, prize: string }[];
   type: "technical" | "non-technical" | "cultural";
   status?: "upcoming" | "ongoing" | "completed";
 }
+
+const prizeSchema = z.object({
+    position: z.string().min(1, 'Position is required'),
+    prize: z.string().min(1, 'Prize is required'),
+});
 
 export const eventSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -26,7 +31,7 @@ export const eventSchema = z.object({
   time: z.string().min(1, 'Time is required'),
   image: z.string().url('Must be a valid URL'),
   rules: z.array(z.string()).min(1, 'At least one rule is required'),
-  prizes: z.array(z.string()).min(1, 'At least one prize is required'),
+  prizes: z.array(prizeSchema).min(1, 'At least one prize is required'),
 });
 
 export type EventFormData = z.infer<typeof eventSchema>;
