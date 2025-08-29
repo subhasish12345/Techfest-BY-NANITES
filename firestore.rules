@@ -2,30 +2,22 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Events: Publicly readable, admin-only write access
     match /events/{eventId} {
       allow read: if true;
       allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Updates: Publicly readable, admin-only write access
     match /updates/{updateId} {
       allow read: if true;
       allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Users: Can only read/write their own document, and cannot change their role.
     match /users/{userId} {
       allow read, delete: if request.auth != null && request.auth.uid == userId;
-      
-      // Allow user to create their own document
-      allow create: if request.auth != null && request.auth.uid == userId;
-      
-      // Allow user to update their doc, but NOT their role.
-      allow update: if request.auth != null 
-                      && request.auth.uid == userId
-                      && request.resource.data.role == resource.data.role;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && request.auth.uid == userId
+                    && request.resource.data.role == resource.data.role
+                    && request.resource.data.email == resource.data.email;
     }
   }
 }
