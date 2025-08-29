@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, Link } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent } from "@/components/ui/sidebar";
 import { Home, Calendar, Users, Settings, Rss, Loader2 } from "lucide-react";
@@ -32,29 +32,37 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
         <Sidebar className="border-r border-primary/20">
           <SidebarContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/admin" tooltip="Dashboard">
-                  <Home />
-                  Dashboard
-                </SidebarMenuButton>
+               <SidebarMenuItem>
+                 <Link href="/admin" legacyBehavior passHref>
+                    <SidebarMenuButton tooltip="Dashboard">
+                      <Home />
+                      Dashboard
+                    </SidebarMenuButton>
+                  </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/admin/events" tooltip="Manage Events">
-                  <Calendar />
-                  Manage Events
-                </SidebarMenuButton>
+                 <Link href="/admin/events" legacyBehavior passHref>
+                    <SidebarMenuButton tooltip="Manage Events">
+                      <Calendar />
+                      Manage Events
+                    </SidebarMenuButton>
+                 </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/admin/users" tooltip="Manage Users">
-                  <Users />
-                  Manage Users
-                </SidebarMenuButton>
+                <Link href="/admin/users" legacyBehavior passHref>
+                    <SidebarMenuButton tooltip="Manage Users">
+                      <Users />
+                      Manage Users
+                    </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
                  <SidebarMenuItem>
-                <SidebarMenuButton href="/admin/updates" tooltip="Manage Updates">
-                  <Rss />
-                  Manage Updates
-                </SidebarMenuButton>
+                    <Link href="/admin/updates" legacyBehavior passHref>
+                        <SidebarMenuButton tooltip="Manage Updates">
+                        <Rss />
+                        Manage Updates
+                        </SidebarMenuButton>
+                    </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>

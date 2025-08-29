@@ -15,7 +15,7 @@ export function Hero() {
         muted 
         playsInline
         className="absolute top-0 left-0 w-full h-full object-cover -z-20"
-        src="https://cdn.pixabay.com/video/2024/05/23/213512-948192451_large.mp4"
+        src="https://cdn.pixabay.com/video/2023/10/25/185590-879758474_large.mp4"
         data-ai-hint="abstract technology"
       />
       <div className="absolute inset-0 bg-background/70 -z-10 backdrop-blur-sm"></div>
