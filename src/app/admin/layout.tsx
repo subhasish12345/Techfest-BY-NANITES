@@ -2,7 +2,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, Link } from "next/navigation";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent } from "@/components/ui/sidebar";
 import { Home, Calendar, Users, Settings, Rss, Loader2 } from "lucide-react";
