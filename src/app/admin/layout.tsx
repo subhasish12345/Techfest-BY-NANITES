@@ -34,7 +34,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
           <SidebarContent>
             <SidebarMenu>
                <SidebarMenuItem>
-                 <Link href="/admin" legacyBehavior passHref>
+                 <Link href="/admin">
                     <SidebarMenuButton tooltip="Dashboard">
                       <Home />
                       Dashboard
@@ -42,7 +42,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                   </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                 <Link href="/admin/events" legacyBehavior passHref>
+                 <Link href="/admin/events">
                     <SidebarMenuButton tooltip="Manage Events">
                       <Calendar />
                       Manage Events
@@ -50,7 +50,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                  </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/admin/users" legacyBehavior passHref>
+                <Link href="/admin/users">
                     <SidebarMenuButton tooltip="Manage Users">
                       <Users />
                       Manage Users
@@ -58,7 +58,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuItem>
                  <SidebarMenuItem>
-                    <Link href="/admin/updates" legacyBehavior passHref>
+                    <Link href="/admin/updates">
                         <SidebarMenuButton tooltip="Manage Updates">
                         <Rss />
                         Manage Updates
