@@ -31,7 +31,7 @@ export function LiveUpdates() {
   }, []);
 
   const formatTimestamp = (timestamp: any) => {
-    if (!timestamp || !timestamp.toDate) return 'Just now';
+    if (!timestamp || typeof timestamp.toDate !== 'function') return 'Just now';
     
     const date = timestamp.toDate();
     const now = new Date();
@@ -92,7 +92,7 @@ export function LiveUpdates() {
                             <Bell className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                            <p className="text-primary-foreground">{update.message}</p>
+                            <p className="text-foreground">{update.message}</p>
                             <p className="font-code text-sm text-muted-foreground">
                             {formatTimestamp(update.timestamp)}
                             </p>
