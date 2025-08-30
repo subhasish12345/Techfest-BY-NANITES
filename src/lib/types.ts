@@ -25,6 +25,17 @@ const prizeSchema = z.object({
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
+
+const imageSchema = z
+  .any()
+  .refine((file): file is File => file instanceof File, "Image is required.")
+  .refine((file) => file.size > 0, "Image is required.")
+  .refine((file) => file.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
+  .refine(
+    (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+    "Only .jpg, .jpeg, .png and .webp formats are supported."
+  );
+
 // Schema for the client-side form (React Hook Form)
 export const eventSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -33,18 +44,9 @@ export const eventSchema = z.object({
   type: z.enum(['technical', 'non-technical', 'cultural']),
   date: z.string().min(1, 'Date is required'),
   time: z.string().min(1, 'Time is required'),
-  image: z.any()
-    .refine((file): file is File => file instanceof File, "Image is required.")
-    .refine((file) => file.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
-    .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
-      "Only .jpg, .jpeg, .png and .webp formats are supported."
-    ).optional(),
+  image: z.any().optional(), // Image is optional here, will be validated in onSubmit
   rules: z.array(z.string().min(1, "Rule cannot be empty")).min(1, 'At least one rule is required'),
   prizes: z.array(prizeSchema).min(1, 'At least one prize is required'),
-}).refine(data => data.image, {
-    message: 'An event image is required when creating a new event.',
-    path: ['image'],
 });
 
 
@@ -58,7 +60,7 @@ export const eventFormSchema = z.object({
     type: z.enum(['technical', 'non-technical', 'cultural']),
     date: z.string().min(1, 'Date is required'),
     time: z.string().min(1, 'Time is required'),
-    image: z.instanceof(File).optional(),
+    image: imageSchema,
     rules: z.array(z.string().min(1, "Rule cannot be empty.")).min(1, "At least one rule is required."),
     prizes: z.string().transform((str, ctx) => {
         try {

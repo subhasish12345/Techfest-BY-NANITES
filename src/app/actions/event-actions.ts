@@ -112,7 +112,12 @@ export async function updateEvent(id: string, formData: FormData) {
         prizes: formData.get('prizes')
     };
 
-    const validation = eventFormSchema.safeParse(rawData);
+    // When updating, the image is optional. We create a schema that reflects this.
+    const updateSchema = eventFormSchema.extend({
+        image: eventFormSchema.shape.image.optional(),
+    });
+
+    const validation = updateSchema.safeParse(rawData);
     if (!validation.success) {
         console.error("Zod Validation Errors:", validation.error.flatten().fieldErrors);
         throw new Error('Invalid form data provided for update.');
