@@ -11,7 +11,7 @@ import { eventFormSchema } from '@/lib/types';
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
@@ -74,7 +74,7 @@ export async function addEvent(formData: FormData) {
 
   } catch (error) {
     console.error('Error creating event:', error);
-    throw new Error('Failed to create event.');
+    throw new Error('Failed to create event. Make sure your Cloudinary credentials are set correctly in the .env file.');
   }
 }
 
@@ -123,6 +123,6 @@ export async function updateEvent(id: string, formData: FormData) {
 
     } catch (error) {
         console.error('Error updating event:', error);
-        throw new Error('Failed to update event.');
+        throw new Error('Failed to update event. Make sure your Cloudinary credentials are set correctly in the .env file.');
     }
 }
