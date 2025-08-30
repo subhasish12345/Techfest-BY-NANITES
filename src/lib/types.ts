@@ -22,6 +22,8 @@ const prizeSchema = z.object({
     prize: z.string().min(1, 'Prize is required'),
 });
 
+const imageSchema = z.instanceof(File).optional();
+
 export const eventSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
@@ -29,9 +31,12 @@ export const eventSchema = z.object({
   type: z.enum(['technical', 'non-technical', 'cultural']),
   date: z.string().min(1, 'Date is required'),
   time: z.string().min(1, 'Time is required'),
-  image: z.any().refine(file => file instanceof File, { message: "Image is required" }),
+  image: imageSchema,
   rules: z.array(z.string()).min(1, 'At least one rule is required'),
   prizes: z.array(prizeSchema).min(1, 'At least one prize is required'),
+}).refine(data => data.image || data.id, {
+    message: "Image is required for new events",
+    path: ["image"],
 });
 
 export type EventFormData = z.infer<typeof eventSchema>;

@@ -40,7 +40,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { addEvent } from "@/app/actions/event-actions";
+import { addEvent, updateEvent } from "@/app/actions/event-actions";
 
 
 interface EventFormProps {
@@ -96,18 +96,19 @@ export function EventForm({ event }: EventFormProps) {
     });
 
     try {
-      // For now, we only handle creation. Editing would require a separate action.
       if (isEditing) {
-          // TODO: Implement edit functionality
-          toast({ variant: "destructive", title: "Editing not implemented yet."});
-          return;
+          await updateEvent(event.id, formData);
+          toast({
+            title: "Event Updated",
+            description: "The event has been successfully updated.",
+          });
+      } else {
+          await addEvent(formData);
+          toast({
+            title: "Event Created",
+            description: "The new event has been successfully created.",
+          });
       }
-
-      await addEvent(formData);
-      toast({
-        title: "Event Created",
-        description: "The new event has been successfully created.",
-      });
 
       router.push("/admin/events");
       router.refresh();
@@ -254,7 +255,7 @@ export function EventForm({ event }: EventFormProps) {
                         <Input type="file" accept="image/*" {...fileRef} />
                     </FormControl>
                     <FormDescription>
-                        Upload an image for the event.
+                        {isEditing ? "Upload a new image to replace the existing one." : "Upload an image for the event."}
                     </FormDescription>
                     <FormMessage />
                     </FormItem>

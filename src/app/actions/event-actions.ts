@@ -4,7 +4,7 @@
 import { z } from 'zod';
 import { v2 as cloudinary } from 'cloudinary';
 import { db } from '@/lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
 // Configure Cloudinary
@@ -19,6 +19,8 @@ const prizeSchema = z.object({
     prize: z.string().min(1, 'Prize is required'),
 });
 
+const imageSchema = z.instanceof(File).optional();
+
 // Zod schema for FormData validation
 const eventFormSchema = z.object({
   title: z.string().min(1),
@@ -27,7 +29,7 @@ const eventFormSchema = z.object({
   type: z.enum(['technical', 'non-technical', 'cultural']),
   date: z.string().min(1),
   time: z.string().min(1),
-  image: z.instanceof(File),
+  image: imageSchema,
   rules: z.array(z.string()),
   prizes: z.string().transform((str) => JSON.parse(str)),
 });
@@ -61,7 +63,7 @@ export async function addEvent(formData: FormData) {
     prizes: formData.get('prizes')
   };
 
-  const validation = eventFormSchema.safeParse(rawData);
+  const validation = eventFormSchema.extend({ image: z.instanceof(File) }).safeParse(rawData);
 
   if (!validation.success) {
     console.error(validation.error.flatten().fieldErrors);
@@ -81,7 +83,6 @@ export async function addEvent(formData: FormData) {
 
     await addDoc(collection(db, 'events'), finalEventData);
 
-    // Revalidate the events page to show the new event
     revalidatePath('/events');
     revalidatePath('/admin/events');
 
@@ -89,4 +90,52 @@ export async function addEvent(formData: FormData) {
     console.error('Error creating event:', error);
     throw new Error('Failed to create event.');
   }
+}
+
+export async function updateEvent(id: string, formData: FormData) {
+    const rawData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        category: formData.get('category'),
+        type: formData.get('type'),
+        date: formData.get('date'),
+        time: formData.get('time'),
+        image: formData.get('image'),
+        rules: formData.getAll('rules[]'),
+        prizes: formData.get('prizes')
+    };
+
+    const validation = eventFormSchema.safeParse(rawData);
+    if (!validation.success) {
+        console.error(validation.error.flatten().fieldErrors);
+        throw new Error('Invalid form data provided for update.');
+    }
+
+    const { image, ...eventData } = validation.data;
+    const eventRef = doc(db, 'events', id);
+
+    try {
+        let imageUrl;
+        if (image && image.size > 0) {
+            imageUrl = await uploadImageToCloudinary(image);
+        }
+
+        const finalEventData: any = {
+            ...eventData
+        };
+
+        if (imageUrl) {
+            finalEventData.image = imageUrl;
+        }
+
+        await updateDoc(eventRef, finalEventData);
+
+        revalidatePath('/events');
+        revalidatePath(`/events/${id}`);
+        revalidatePath('/admin/events');
+
+    } catch (error) {
+        console.error('Error updating event:', error);
+        throw new Error('Failed to update event.');
+    }
 }
