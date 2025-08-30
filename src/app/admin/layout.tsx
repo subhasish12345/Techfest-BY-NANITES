@@ -36,7 +36,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                  <Link href="/admin">
                     <SidebarMenuButton tooltip="Dashboard" asChild>
                         <span>
-                            <Home />
+                            <Home className="h-4 w-4" />
                             Dashboard
                         </span>
                     </SidebarMenuButton>
@@ -46,7 +46,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                  <Link href="/admin/events">
                     <SidebarMenuButton tooltip="Manage Events" asChild>
                         <span>
-                            <Calendar />
+                            <Calendar className="h-4 w-4" />
                             Manage Events
                         </span>
                     </SidebarMenuButton>
@@ -56,7 +56,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                 <Link href="/admin/users">
                     <SidebarMenuButton tooltip="Manage Users" asChild>
                         <span>
-                            <Users />
+                            <Users className="h-4 w-4" />
                             Manage Users
                         </span>
                     </SidebarMenuButton>
@@ -66,7 +66,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                     <Link href="/admin/updates">
                         <SidebarMenuButton tooltip="Manage Updates" asChild>
                             <span>
-                                <Rss />
+                                <Rss className="h-4 w-4" />
                                 Manage Updates
                             </span>
                         </SidebarMenuButton>
