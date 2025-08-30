@@ -68,6 +68,8 @@ export function EventForm({ event }: EventFormProps) {
     },
   });
 
+  const fileRef = form.register("image");
+
   const { fields: rulesFields, append: appendRule, remove: removeRule } = useFieldArray({
     control: form.control,
     name: "rules",
@@ -124,8 +126,6 @@ export function EventForm({ event }: EventFormProps) {
       setIsLoading(false);
     }
   };
-  
-  const fileRef = form.register("image");
 
   return (
     <Card>
