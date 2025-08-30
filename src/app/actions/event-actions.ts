@@ -9,14 +9,8 @@ import { revalidatePath } from 'next/cache';
 import { eventFormSchema } from '@/lib/types';
 
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-function checkCloudinaryCredentials() {
+// This function now handles both configuration and checking credentials.
+function configureAndCheckCloudinary() {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
@@ -27,10 +21,18 @@ function checkCloudinaryCredentials() {
     if (cloudName === 'YOUR_CLOUD_NAME_HERE' || apiKey === 'YOUR_API_KEY' || apiSecret === 'YOUR_API_SECRET') {
         throw new Error('Default Cloudinary credentials found. Please replace them with your actual credentials in the .env file.');
     }
+
+    // Configure Cloudinary inside the function to use the latest process.env values
+    cloudinary.config({
+        cloud_name: cloudName,
+        api_key: apiKey,
+        api_secret: apiSecret,
+    });
 }
 
 async function uploadImageToCloudinary(image: File): Promise<string> {
-    checkCloudinaryCredentials();
+    // Configure and check credentials on every upload attempt.
+    configureAndCheckCloudinary();
     
     const fileBuffer = await image.arrayBuffer();
     const mime = image.type;
@@ -45,7 +47,8 @@ async function uploadImageToCloudinary(image: File): Promise<string> {
         return result.secure_url;
     } catch (error: any) {
         console.error("Cloudinary Upload Error:", error);
-        throw new Error(`Cloudinary upload failed: ${error.message}`);
+        // Throw a more specific error to help with debugging.
+        throw new Error(`Cloudinary upload failed: ${error.message}. Please ensure your credentials are correct.`);
     }
 }
 
