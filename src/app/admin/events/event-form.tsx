@@ -46,8 +46,6 @@ export function EventForm({ eventId }: EventFormProps) {
     },
   });
 
-  const fileRef = form.register("image");
-
   const { fields: ruleFields, append: appendRule, remove: removeRule } = useFieldArray({
     control: form.control,
     name: "rules",
@@ -67,11 +65,13 @@ export function EventForm({ eventId }: EventFormProps) {
           const eventDoc = await getDoc(eventDocRef);
           if (eventDoc.exists()) {
             const eventData = eventDoc.data() as Event;
-            form.reset({
-              ...eventData,
-              prizes: eventData.prizes || [{ position: "1st Prize", prize: "" }],
-              rules: eventData.rules || ["Rule 1"]
-            });
+            const fetchedData = {
+                ...eventData,
+                image: undefined, // Don't try to load the remote image URL into the file input
+                prizes: eventData.prizes || [{ position: "1st Prize", prize: "" }],
+                rules: eventData.rules || ["Rule 1"]
+            };
+            form.reset(fetchedData);
           } else {
             toast({ variant: 'destructive', title: 'Error', description: 'Event not found.' });
             router.push('/admin/events');
@@ -89,14 +89,16 @@ export function EventForm({ eventId }: EventFormProps) {
   const onSubmit = async (data: EventFormData) => {
     setIsLoading(true);
     const formData = new FormData();
+    
+    // Use Object.entries on the validated data, not the form's internal state
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'image' && value) {
-        formData.append(key, (value as FileList)[0]);
+        // 'image' is now a File object from zod refine, not FileList
+        formData.append(key, value);
       } else if (key === 'prizes') {
         formData.append(key, JSON.stringify(value));
-      }
-       else if (Array.isArray(value)) {
-        value.forEach(item => formData.append(`${key}[]`, item));
+      } else if (key === 'rules') {
+        value.forEach((item: string) => formData.append(`${key}[]`, item));
       } else if (value != null) {
         formData.append(key, value as string);
       }
@@ -110,7 +112,7 @@ export function EventForm({ eventId }: EventFormProps) {
         await addEvent(formData);
         toast({ title: "Success", description: "Event created successfully." });
       }
-      router.push("/admin/events");
+      router.push("/admin");
       router.refresh();
     } catch (error: any) {
       toast({
@@ -171,7 +173,7 @@ export function EventForm({ eventId }: EventFormProps) {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Category</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select a category" />
@@ -193,7 +195,7 @@ export function EventForm({ eventId }: EventFormProps) {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Type</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select event type" />
@@ -245,7 +247,7 @@ export function EventForm({ eventId }: EventFormProps) {
                         <FormItem>
                         <FormLabel>Event Image</FormLabel>
                         <FormControl>
-                            <Input type="file" {...fileRef} />
+                           <Input type="file" onChange={(e) => field.onChange(e.target.files ? e.target.files[0] : null)} />
                         </FormControl>
                         <FormDescription>
                             Upload a high-quality image for the event banner.
@@ -265,8 +267,9 @@ export function EventForm({ eventId }: EventFormProps) {
                             render={({ field }) => (
                                 <FormItem className="flex-grow">
                                     <FormControl>
-                                        <Input placeholder={`Rule ${index + 1}`} {...field} />
+                                        <Input placeholder={`Rule ${index + 1}`} {...field} value={field.value || ''}/>
                                     </FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
@@ -291,8 +294,9 @@ export function EventForm({ eventId }: EventFormProps) {
                                 render={({ field }) => (
                                     <FormItem className="w-1/3">
                                         <FormControl>
-                                            <Input placeholder="Position" {...field} />
+                                            <Input placeholder="Position" {...field} value={field.value || ''} />
                                         </FormControl>
+                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
@@ -302,8 +306,9 @@ export function EventForm({ eventId }: EventFormProps) {
                                 render={({ field }) => (
                                     <FormItem className="flex-grow">
                                         <FormControl>
-                                            <Input placeholder="Prize description" {...field} />
+                                            <Input placeholder="Prize description" {...field} value={field.value || ''} />
                                         </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />

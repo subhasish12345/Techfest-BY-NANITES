@@ -34,10 +34,35 @@ export const eventSchema = z.object({
   image: imageSchema,
   rules: z.array(z.string()).min(1, 'At least one rule is required'),
   prizes: z.array(prizeSchema).min(1, 'At least one prize is required'),
-}).refine(data => data.image || data.id, {
-    message: "Image is required for new events",
-    path: ["image"],
 });
+
+
+export const eventFormSchema = z.object({
+    title: z.string().min(1, 'Title is required'),
+    description: z.string().min(1, 'Description is required'),
+    category: z.string().min(1, 'Category is required'),
+    type: z.enum(['technical', 'non-technical', 'cultural']),
+    date: z.string().min(1, 'Date is required'),
+    time: z.string().min(1, 'Time is required'),
+    image: z.instanceof(File).optional(),
+    rules: z.array(z.string()).min(1, "At least one rule is required."),
+    prizes: z.string().transform((str, ctx) => {
+        try {
+            const parsed = JSON.parse(str);
+            const prizesArraySchema = z.array(prizeSchema).min(1, "At least one prize is required.");
+            const validation = prizesArraySchema.safeParse(parsed);
+            if (!validation.success) {
+                ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid prize format." });
+                return z.NEVER;
+            }
+            return validation.data;
+        } catch (e) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Prizes must be a valid JSON string." });
+            return z.NEVER;
+        }
+    }),
+});
+
 
 export type EventFormData = z.infer<typeof eventSchema>;
 

@@ -4,34 +4,16 @@
 import { z } from 'zod';
 import { v2 as cloudinary } from 'cloudinary';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
+import { eventFormSchema } from '@/lib/types';
+
 
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const prizeSchema = z.object({
-    position: z.string().min(1, 'Position is required'),
-    prize: z.string().min(1, 'Prize is required'),
-});
-
-const imageSchema = z.instanceof(File).optional();
-
-// Zod schema for FormData validation
-const eventFormSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
-  category: z.string().min(1),
-  type: z.enum(['technical', 'non-technical', 'cultural']),
-  date: z.string().min(1),
-  time: z.string().min(1),
-  image: imageSchema,
-  rules: z.array(z.string()),
-  prizes: z.string().transform((str) => JSON.parse(str)),
 });
 
 
@@ -63,7 +45,7 @@ export async function addEvent(formData: FormData) {
     prizes: formData.get('prizes')
   };
 
-  const validation = eventFormSchema.extend({ image: z.instanceof(File) }).safeParse(rawData);
+  const validation = eventFormSchema.safeParse(rawData);
 
   if (!validation.success) {
     console.error(validation.error.flatten().fieldErrors);
@@ -71,6 +53,10 @@ export async function addEvent(formData: FormData) {
   }
 
   const { image, ...eventData } = validation.data;
+  
+  if (!image || image.size === 0) {
+      throw new Error('Image is required for a new event.');
+  }
 
   try {
     const imageUrl = await uploadImageToCloudinary(image);
@@ -83,8 +69,8 @@ export async function addEvent(formData: FormData) {
 
     await addDoc(collection(db, 'events'), finalEventData);
 
+    revalidatePath('/admin');
     revalidatePath('/events');
-    revalidatePath('/admin/events');
 
   } catch (error) {
     console.error('Error creating event:', error);
@@ -116,6 +102,7 @@ export async function updateEvent(id: string, formData: FormData) {
 
     try {
         let imageUrl;
+        // The image object might be a File with size 0 if no new file is selected
         if (image && image.size > 0) {
             imageUrl = await uploadImageToCloudinary(image);
         }
@@ -130,9 +117,9 @@ export async function updateEvent(id: string, formData: FormData) {
 
         await updateDoc(eventRef, finalEventData);
 
+        revalidatePath('/admin');
         revalidatePath('/events');
         revalidatePath(`/events/${id}`);
-        revalidatePath('/admin/events');
 
     } catch (error) {
         console.error('Error updating event:', error);
