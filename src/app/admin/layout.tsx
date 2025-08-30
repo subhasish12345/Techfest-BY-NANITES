@@ -1,8 +1,8 @@
 
 "use client";
 
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent } from "@/components/ui/sidebar";
@@ -36,32 +36,40 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                <SidebarMenuItem>
                  <Link href="/admin">
                     <SidebarMenuButton tooltip="Dashboard" asChild>
-                        <Home />
-                        Dashboard
+                        <span>
+                            <Home />
+                            Dashboard
+                        </span>
                     </SidebarMenuButton>
                   </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
                  <Link href="/admin/events">
                     <SidebarMenuButton tooltip="Manage Events" asChild>
-                        <Calendar />
-                        Manage Events
+                        <span>
+                            <Calendar />
+                            Manage Events
+                        </span>
                     </SidebarMenuButton>
                  </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <Link href="/admin/users">
                     <SidebarMenuButton tooltip="Manage Users" asChild>
-                        <Users />
-                        Manage Users
+                        <span>
+                            <Users />
+                            Manage Users
+                        </span>
                     </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
                  <SidebarMenuItem>
                     <Link href="/admin/updates">
                         <SidebarMenuButton tooltip="Manage Updates" asChild>
-                            <Rss />
-                            Manage Updates
+                            <span>
+                                <Rss />
+                                Manage Updates
+                            </span>
                         </SidebarMenuButton>
                     </Link>
               </SidebarMenuItem>
