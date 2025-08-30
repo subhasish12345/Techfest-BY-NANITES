@@ -88,38 +88,32 @@ export function EventForm({ eventId }: EventFormProps) {
 
   const onSubmit = async (data: EventFormData) => {
     setIsLoading(true);
+
+    if (!isEditing && !data.image) {
+        toast({ variant: 'destructive', title: 'Validation Error', description: 'An event image is required.'});
+        setIsLoading(false);
+        return;
+    }
+
     const formData = new FormData();
     
-    // Use Object.entries on the validated data, not the form's internal state
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'image' && value) {
-        // 'image' is now a File object from zod refine, not FileList
         formData.append(key, value);
-      } else if (key === 'prizes') {
+      } else if (key === 'prizes' && Array.isArray(value)) {
         formData.append(key, JSON.stringify(value));
-      } else if (key === 'rules') {
+      } else if (key === 'rules' && Array.isArray(value)) {
         value.forEach((item: string) => formData.append(`${key}[]`, item));
       } else if (value != null) {
         formData.append(key, value as string);
       }
     });
 
-    // Add this check to satisfy the schema for updates where image is not changed
-    if (!data.image && isEditing) {
-        formData.delete('image');
-    }
-
-
     try {
       if (isEditing) {
         await updateEvent(eventId, formData);
         toast({ title: "Success", description: "Event updated successfully." });
       } else {
-        if (!data.image) {
-            toast({ variant: 'destructive', title: 'Validation Error', description: 'An event image is required.'});
-            setIsLoading(false);
-            return;
-        }
         await addEvent(formData);
         toast({ title: "Success", description: "Event created successfully." });
       }

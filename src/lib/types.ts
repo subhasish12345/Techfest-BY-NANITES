@@ -33,17 +33,20 @@ export const eventSchema = z.object({
   type: z.enum(['technical', 'non-technical', 'cultural']),
   date: z.string().min(1, 'Date is required'),
   time: z.string().min(1, 'Time is required'),
-  image: z
-    .instanceof(File)
-    .optional()
-    .refine((file) => !file || file.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
+  image: z.any()
+    .refine((file): file is File => file instanceof File, "Image is required.")
+    .refine((file) => file.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
     .refine(
-        (file) => !file || file.type === '' || ACCEPTED_IMAGE_TYPES.includes(file.type),
-        "Only .jpg, .jpeg, .png and .webp formats are supported."
-    ),
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Only .jpg, .jpeg, .png and .webp formats are supported."
+    ).optional(),
   rules: z.array(z.string().min(1, "Rule cannot be empty")).min(1, 'At least one rule is required'),
   prizes: z.array(prizeSchema).min(1, 'At least one prize is required'),
+}).refine(data => data.image, {
+    message: 'An event image is required when creating a new event.',
+    path: ['image'],
 });
+
 
 export type EventFormData = z.infer<typeof eventSchema>;
 
