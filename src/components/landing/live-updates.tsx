@@ -31,7 +31,8 @@ export function LiveUpdates() {
   }, []);
 
   const formatTimestamp = (timestamp: any) => {
-    if (!timestamp) return 'Just now';
+    if (!timestamp || !timestamp.toDate) return 'Just now';
+    
     const date = timestamp.toDate();
     const now = new Date();
     const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
