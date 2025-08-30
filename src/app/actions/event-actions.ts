@@ -11,14 +11,14 @@ import { eventFormSchema } from '@/lib/types';
 
 // This function now handles both configuration and checking credentials.
 function configureAndCheckCloudinary() {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
     if (!cloudName || !apiKey || !apiSecret) {
         throw new Error('Cloudinary environment variables are missing. Please check your .env file.');
     }
-    if (cloudName === 'YOUR_CLOUD_NAME_HERE' || apiKey === 'YOUR_API_KEY' || apiSecret === 'YOUR_API_SECRET') {
+    if (cloudName === 'CLOUDINARY_CLOUD_NAME' || apiKey === 'CLOUDINARY_API_KEY' || apiSecret === 'CLOUDINARY_API_SECRET') {
         throw new Error('Default Cloudinary credentials found. Please replace them with your actual credentials in the .env file.');
     }
 
