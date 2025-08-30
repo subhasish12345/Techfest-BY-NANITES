@@ -38,10 +38,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { addEvent } from "@/app/actions/event-actions";
+
 
 interface EventFormProps {
   event?: Event;
@@ -62,7 +62,7 @@ export function EventForm({ event }: EventFormProps) {
       type: event?.type || "technical",
       date: event?.date || "",
       time: event?.time || "",
-      image: event?.image || "",
+      image: undefined,
       rules: event?.rules || [""],
       prizes: event?.prizes || [{ position: "", prize: "" }],
     },
@@ -80,23 +80,38 @@ export function EventForm({ event }: EventFormProps) {
 
   const onSubmit = async (data: EventFormData) => {
     setIsLoading(true);
-    try {
-      if (isEditing && event.id) {
-        const eventRef = doc(db, "events", event.id);
-        await setDoc(eventRef, data);
-        toast({
-          title: "Event Updated",
-          description: "The event has been successfully updated.",
-        });
-      } else {
-        await addDoc(collection(db, "events"), data);
-        toast({
-          title: "Event Created",
-          description: "The new event has been successfully created.",
-        });
+    
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'image' && value instanceof File) {
+        formData.append(key, value);
+      } else if (key === 'rules' && Array.isArray(value)) {
+        value.forEach(rule => formData.append('rules[]', rule));
+      } else if (key === 'prizes' && Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
       }
+      else if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    });
+
+    try {
+      // For now, we only handle creation. Editing would require a separate action.
+      if (isEditing) {
+          // TODO: Implement edit functionality
+          toast({ variant: "destructive", title: "Editing not implemented yet."});
+          return;
+      }
+
+      await addEvent(formData);
+      toast({
+        title: "Event Created",
+        description: "The new event has been successfully created.",
+      });
+
       router.push("/admin/events");
       router.refresh();
+
     } catch (error) {
       console.error("Failed to save event:", error);
       toast({
@@ -108,6 +123,8 @@ export function EventForm({ event }: EventFormProps) {
       setIsLoading(false);
     }
   };
+  
+  const fileRef = form.register("image");
 
   return (
     <Card>
@@ -228,20 +245,20 @@ export function EventForm({ event }: EventFormProps) {
                 />
             </div>
              <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Image URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://placehold.co/600x400.png" {...field} />
-                  </FormControl>
-                   <FormDescription>
-                    Use a placeholder from placehold.co or a direct image link.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Event Poster</FormLabel>
+                    <FormControl>
+                        <Input type="file" accept="image/*" {...fileRef} />
+                    </FormControl>
+                    <FormDescription>
+                        Upload an image for the event.
+                    </FormDescription>
+                    <FormMessage />
+                    </FormItem>
+                )}
             />
             <div>
               <FormLabel>Rules</FormLabel>

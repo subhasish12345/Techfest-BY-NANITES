@@ -29,7 +29,7 @@ export const eventSchema = z.object({
   type: z.enum(['technical', 'non-technical', 'cultural']),
   date: z.string().min(1, 'Date is required'),
   time: z.string().min(1, 'Time is required'),
-  image: z.string().url('Must be a valid URL'),
+  image: z.any().refine(file => file instanceof File, { message: "Image is required" }),
   rules: z.array(z.string()).min(1, 'At least one rule is required'),
   prizes: z.array(prizeSchema).min(1, 'At least one prize is required'),
 });
@@ -122,4 +122,14 @@ export interface UserData {
 export interface GalleryImage {
     src: string;
     alt: string;
+}
+
+export interface EventRegistration {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  regNo?: string;
+  branch?: string;
+  semester?: string;
+  registeredAt: Timestamp;
 }

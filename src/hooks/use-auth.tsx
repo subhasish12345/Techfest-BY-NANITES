@@ -18,9 +18,9 @@ import {
   User,
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-import { doc, setDoc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-import type { UserData, UserProfileFormData } from "@/lib/types";
+import type { UserData, UserProfileFormData, EventRegistration } from "@/lib/types";
 
 interface AuthContextType {
   user: User | null;
@@ -161,16 +161,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const registerForEvent = async (eventId: string) => {
-    if (!user) {
+    if (!user || !userData) {
       throw new Error("You must be logged in to register for an event.");
     }
     setLoading(true);
     try {
+      // 1. Add event to the user's registered list
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         registeredEvents: arrayUnion(eventId)
       });
-      // Refresh user data locally
+
+      // 2. Create a registration record in the event's sub-collection
+      const registrationRef = doc(db, `events/${eventId}/registrations`, user.uid);
+      const registrationData: EventRegistration = {
+        userId: user.uid,
+        userName: userData.displayName,
+        userEmail: userData.email,
+        regNo: userData.regNo,
+        branch: userData.branch,
+        semester: userData.semester,
+        registeredAt: serverTimestamp() as any,
+      };
+      await setDoc(registrationRef, registrationData);
+
+      // 3. Refresh user data locally
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
         setUserData(userDoc.data() as UserData);
