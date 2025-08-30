@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect } from "react";
@@ -5,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent } from "@/components/ui/sidebar";
-import { Home, Calendar, Users, Settings, Rss, Loader2 } from "lucide-react";
+import { Home, Users, Rss, Loader2 } from "lucide-react";
 import { ProfileHeader } from "@/components/dashboard/profile-header";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -41,16 +42,6 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                         </span>
                     </SidebarMenuButton>
                   </Link>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                 <Link href="/admin/events">
-                    <SidebarMenuButton tooltip="Manage Events" asChild>
-                        <span>
-                            <Calendar className="h-4 w-4" />
-                            Manage Events
-                        </span>
-                    </SidebarMenuButton>
-                 </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <Link href="/admin/users">
