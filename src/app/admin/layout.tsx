@@ -44,7 +44,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                   </Link>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                 <Link href="/admin/events">
+                 <Link href="/admin">
                     <SidebarMenuButton tooltip="Manage Events" asChild>
                         <span>
                             <CalendarPlus className="h-4 w-4" />
@@ -92,3 +92,5 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
 }
 
 export default AdminLayout;
+
+    
