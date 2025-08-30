@@ -36,40 +36,40 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                <SidebarMenuItem>
                  <Link href="/admin">
                     <SidebarMenuButton tooltip="Dashboard" asChild>
-                      <>
+                      <React.Fragment>
                         <Home />
                         Dashboard
-                      </>
+                      </React.Fragment>
                     </SidebarMenuButton>
                   </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
                  <Link href="/admin/events">
                     <SidebarMenuButton tooltip="Manage Events" asChild>
-                      <>
+                      <React.Fragment>
                         <Calendar />
                         Manage Events
-                      </>
+                      </React.Fragment>
                     </SidebarMenuButton>
                  </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <Link href="/admin/users">
                     <SidebarMenuButton tooltip="Manage Users" asChild>
-                      <>
+                      <React.Fragment>
                         <Users />
                         Manage Users
-                      </>
+                      </React.Fragment>
                     </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
                  <SidebarMenuItem>
                     <Link href="/admin/updates">
                         <SidebarMenuButton tooltip="Manage Updates" asChild>
-                          <>
+                          <React.Fragment>
                             <Rss />
                             Manage Updates
-                          </>
+                          </React.Fragment>
                         </SidebarMenuButton>
                     </Link>
               </SidebarMenuItem>
