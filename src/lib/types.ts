@@ -25,15 +25,7 @@ const prizeSchema = z.object({
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-const imageSchema = z
-  .instanceof(File)
-  .optional()
-  .refine((file) => !file || file.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
-  .refine(
-    (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
-    "Only .jpg, .jpeg, .png and .webp formats are supported."
-  );
-  
+// Schema for the client-side form (React Hook Form)
 export const eventSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
@@ -41,17 +33,21 @@ export const eventSchema = z.object({
   type: z.enum(['technical', 'non-technical', 'cultural']),
   date: z.string().min(1, 'Date is required'),
   time: z.string().min(1, 'Time is required'),
-  image: imageSchema,
+  image: z
+    .instanceof(File)
+    .optional()
+    .refine((file) => !file || file.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
+    .refine(
+        (file) => !file || file.type === '' || ACCEPTED_IMAGE_TYPES.includes(file.type),
+        "Only .jpg, .jpeg, .png and .webp formats are supported."
+    ),
   rules: z.array(z.string().min(1, "Rule cannot be empty")).min(1, 'At least one rule is required'),
   prizes: z.array(prizeSchema).min(1, 'At least one prize is required'),
-}).refine(data => {
-    // For new events, the image is required. For updates, it's optional.
-    // This can be handled in the form logic, but adding a check here is safer.
-    // We will handle the required logic in the server action itself.
-    return true;
 });
 
+export type EventFormData = z.infer<typeof eventSchema>;
 
+// Schema for the server-side action (FormData)
 export const eventFormSchema = z.object({
     title: z.string().min(1, 'Title is required'),
     description: z.string().min(1, 'Description is required'),
@@ -59,7 +55,7 @@ export const eventFormSchema = z.object({
     type: z.enum(['technical', 'non-technical', 'cultural']),
     date: z.string().min(1, 'Date is required'),
     time: z.string().min(1, 'Time is required'),
-    image: imageSchema.optional(),
+    image: z.instanceof(File).optional(),
     rules: z.array(z.string().min(1, "Rule cannot be empty.")).min(1, "At least one rule is required."),
     prizes: z.string().transform((str, ctx) => {
         try {
@@ -77,9 +73,6 @@ export const eventFormSchema = z.object({
         }
     }),
 });
-
-
-export type EventFormData = z.infer<typeof eventSchema>;
 
 
 export interface Sponsor {

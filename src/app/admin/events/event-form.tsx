@@ -104,11 +104,22 @@ export function EventForm({ eventId }: EventFormProps) {
       }
     });
 
+    // Add this check to satisfy the schema for updates where image is not changed
+    if (!data.image && isEditing) {
+        formData.delete('image');
+    }
+
+
     try {
       if (isEditing) {
         await updateEvent(eventId, formData);
         toast({ title: "Success", description: "Event updated successfully." });
       } else {
+        if (!data.image) {
+            toast({ variant: 'destructive', title: 'Validation Error', description: 'An event image is required.'});
+            setIsLoading(false);
+            return;
+        }
         await addEvent(formData);
         toast({ title: "Success", description: "Event created successfully." });
       }

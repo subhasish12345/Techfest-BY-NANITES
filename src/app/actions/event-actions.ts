@@ -38,11 +38,15 @@ async function uploadImageToCloudinary(image: File): Promise<string> {
     const base64Data = Buffer.from(fileBuffer).toString('base64');
     const fileUri = 'data:' + mime + ';' + encoding + ',' + base64Data;
     
-    const result = await cloudinary.uploader.upload(fileUri, {
-      folder: 'techfest_events',
-    });
-    
-    return result.secure_url;
+    try {
+        const result = await cloudinary.uploader.upload(fileUri, {
+            folder: 'techfest_events',
+        });
+        return result.secure_url;
+    } catch (error: any) {
+        console.error("Cloudinary Upload Error:", error);
+        throw new Error(`Cloudinary upload failed: ${error.message}`);
+    }
 }
 
 
@@ -62,7 +66,7 @@ export async function addEvent(formData: FormData) {
   const validation = eventFormSchema.safeParse(rawData);
 
   if (!validation.success) {
-    console.error(validation.error.flatten().fieldErrors);
+    console.error("Zod Validation Errors:", validation.error.flatten().fieldErrors);
     throw new Error('Invalid form data provided.');
   }
 
@@ -107,7 +111,7 @@ export async function updateEvent(id: string, formData: FormData) {
 
     const validation = eventFormSchema.safeParse(rawData);
     if (!validation.success) {
-        console.error(validation.error.flatten().fieldErrors);
+        console.error("Zod Validation Errors:", validation.error.flatten().fieldErrors);
         throw new Error('Invalid form data provided for update.');
     }
 
