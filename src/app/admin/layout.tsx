@@ -35,33 +35,41 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenu>
                <SidebarMenuItem>
                  <Link href="/admin">
-                    <SidebarMenuButton tooltip="Dashboard">
-                      <Home />
-                      Dashboard
+                    <SidebarMenuButton tooltip="Dashboard" asChild>
+                      <>
+                        <Home />
+                        Dashboard
+                      </>
                     </SidebarMenuButton>
                   </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
                  <Link href="/admin/events">
-                    <SidebarMenuButton tooltip="Manage Events">
-                      <Calendar />
-                      Manage Events
+                    <SidebarMenuButton tooltip="Manage Events" asChild>
+                      <>
+                        <Calendar />
+                        Manage Events
+                      </>
                     </SidebarMenuButton>
                  </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <Link href="/admin/users">
-                    <SidebarMenuButton tooltip="Manage Users">
-                      <Users />
-                      Manage Users
+                    <SidebarMenuButton tooltip="Manage Users" asChild>
+                      <>
+                        <Users />
+                        Manage Users
+                      </>
                     </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
                  <SidebarMenuItem>
                     <Link href="/admin/updates">
-                        <SidebarMenuButton tooltip="Manage Updates">
-                        <Rss />
-                        Manage Updates
+                        <SidebarMenuButton tooltip="Manage Updates" asChild>
+                          <>
+                            <Rss />
+                            Manage Updates
+                          </>
                         </SidebarMenuButton>
                     </Link>
               </SidebarMenuItem>
