@@ -17,18 +17,21 @@ cloudinary.config({
 });
 
 function checkCloudinaryCredentials() {
-    if (
-        !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
-        !process.env.CLOUDINARY_API_KEY ||
-        !process.env.CLOUDINARY_API_SECRET ||
-        process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME_HERE'
-    ) {
-        throw new Error('Cloudinary credentials are not configured. Please check your .env file.');
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+    if (!cloudName || !apiKey || !apiSecret) {
+        throw new Error('Cloudinary environment variables are missing. Please check your .env file.');
+    }
+    if (cloudName === 'YOUR_CLOUD_NAME_HERE' || apiKey === 'YOUR_API_KEY' || apiSecret === 'YOUR_API_SECRET') {
+        throw new Error('Default Cloudinary credentials found. Please replace them with your actual credentials in the .env file.');
     }
 }
 
 async function uploadImageToCloudinary(image: File): Promise<string> {
     checkCloudinaryCredentials();
+    
     const fileBuffer = await image.arrayBuffer();
     const mime = image.type;
     const encoding = 'base64';
