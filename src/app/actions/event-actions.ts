@@ -16,8 +16,19 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+function checkCloudinaryCredentials() {
+    if (
+        !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
+        !process.env.CLOUDINARY_API_KEY ||
+        !process.env.CLOUDINARY_API_SECRET ||
+        process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME_HERE'
+    ) {
+        throw new Error('Cloudinary credentials are not configured. Please check your .env file.');
+    }
+}
 
 async function uploadImageToCloudinary(image: File): Promise<string> {
+    checkCloudinaryCredentials();
     const fileBuffer = await image.arrayBuffer();
     const mime = image.type;
     const encoding = 'base64';
@@ -72,9 +83,9 @@ export async function addEvent(formData: FormData) {
     revalidatePath('/admin');
     revalidatePath('/events');
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating event:', error);
-    throw new Error('Failed to create event. Make sure your Cloudinary credentials are set correctly in the .env file.');
+    throw new Error(error.message || 'Failed to create event.');
   }
 }
 
@@ -121,8 +132,8 @@ export async function updateEvent(id: string, formData: FormData) {
         revalidatePath('/events');
         revalidatePath(`/events/${id}`);
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error updating event:', error);
-        throw new Error('Failed to update event. Make sure your Cloudinary credentials are set correctly in the .env file.');
+        throw new Error(error.message || 'Failed to update event.');
     }
 }
