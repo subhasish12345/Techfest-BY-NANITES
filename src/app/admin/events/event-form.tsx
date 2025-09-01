@@ -311,5 +311,3 @@ export function EventForm({ eventId }: EventFormProps) {
     </Card>
   );
 }
-
-    
