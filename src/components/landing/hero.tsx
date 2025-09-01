@@ -4,21 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Rocket } from "lucide-react";
 import { CountdownTimer } from "./countdown-timer";
 import { MeteorShower } from "./meteor-shower";
+import Image from "next/image";
 
 export function Hero() {
   const festDate = new Date("2024-10-26T09:00:00");
 
   return (
     <div className="relative isolate h-screen min-h-[600px] overflow-hidden flex items-center justify-center text-center">
-       <video 
-        autoPlay 
-        loop 
-        muted 
-        playsInline
+       <Image
+        src="https://picsum.photos/1920/1080?random=100"
+        alt="Abstract technology background"
+        fill
+        priority
         className="absolute top-0 left-0 w-full h-full object-cover -z-20"
-        src="https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4"
         data-ai-hint="abstract technology"
-      />
+       />
       <div className="absolute inset-0 bg-background/70 -z-10 backdrop-blur-sm"></div>
       <MeteorShower />
 

@@ -35,10 +35,10 @@ export function ProfileHeader({ adminView }: { adminView?: boolean }) {
       </Avatar>
       <div>
         <h1 className="font-headline text-3xl font-bold text-primary-foreground">
-          Welcome back, {user?.displayName || user?.email || 'Guest'}!
+          Welcome, {user?.displayName || user?.email || 'Guest'}!
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Here's your personal hub for TechFest 2024. Manage your schedule, view analytics, and get personalized recommendations.
+          Here's your personal hub for TechFest 2024.
         </p>
       </div>
     </div>

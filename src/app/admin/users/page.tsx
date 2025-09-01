@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function ManageUsersPage() {
   const [users, setUsers] = useState<UserData[]>([]);
@@ -86,46 +87,48 @@ export default function ManageUsersPage() {
         <CardTitle>Manage Users</CardTitle>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          renderSkeleton()
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead className="text-center">Registered Events</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.uid}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage src={user.profilePhoto} />
-                        <AvatarFallback>
-                          {getInitials(user.displayName)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">{user.displayName}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant={user.role === "admin" ? "destructive" : "secondary"}>
-                      {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center font-medium">
-                    {user.registeredEvents?.length || 0}
-                  </TableCell>
+        <ScrollArea className="w-full">
+          {loading ? (
+            renderSkeleton()
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead className="text-center">Registered Events</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.uid}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={user.profilePhoto} />
+                          <AvatarFallback>
+                            {getInitials(user.displayName)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{user.displayName}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.role === "admin" ? "destructive" : "secondary"}>
+                        {user.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center font-medium">
+                      {user.registeredEvents?.length || 0}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </ScrollArea>
       </CardContent>
     </Card>
   );
