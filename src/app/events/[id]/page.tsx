@@ -125,6 +125,8 @@ export default function EventDetailPage() {
               src={event.image}
               alt={event.title}
               fill
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
               style={{ objectFit: 'cover' }}
               data-ai-hint="event cover"
             />
