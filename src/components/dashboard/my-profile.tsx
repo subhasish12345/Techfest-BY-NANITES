@@ -22,19 +22,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { userProfileSchema, type UserProfileFormData } from "@/lib/types";
+import { userProfileSchema, type UserProfileFormData, passwordSchema, type PasswordFormData } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { Loader2, User } from "lucide-react";
+import { Loader2, User, KeyRound } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { Textarea } from "../ui/textarea";
 
 export function MyProfile() {
-  const { userData, loading: authLoading, updateUserProfile } = useAuth();
+  const { userData, loading: authLoading, updateUserProfile, updateUserPassword } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
-  const form = useForm<UserProfileFormData>({
+  const profileForm = useForm<UserProfileFormData>({
     resolver: zodResolver(userProfileSchema),
     defaultValues: {
       displayName: "",
@@ -50,9 +51,18 @@ export function MyProfile() {
     },
   });
 
+  const passwordForm = useForm<PasswordFormData>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      newPassword: "",
+      confirmPassword: ""
+    }
+  });
+
+
   useEffect(() => {
     if (userData) {
-      form.reset({
+      profileForm.reset({
         displayName: userData.displayName || "",
         email: userData.email || "",
         regNo: userData.regNo || "",
@@ -65,11 +75,11 @@ export function MyProfile() {
         profilePhoto: userData.profilePhoto || "",
       });
     }
-  }, [userData, form]);
+  }, [userData, profileForm]);
 
 
-  const onSubmit = async (data: UserProfileFormData) => {
-    setIsLoading(true);
+  const onProfileSubmit = async (data: UserProfileFormData) => {
+    setIsUpdatingProfile(true);
     try {
       await updateUserProfile(data);
       toast({
@@ -83,9 +93,30 @@ export function MyProfile() {
         description: error.message || "An unknown error occurred.",
       });
     } finally {
-      setIsLoading(false);
+      setIsUpdatingProfile(false);
     }
   };
+
+  const onPasswordSubmit = async (data: PasswordFormData) => {
+    setIsUpdatingPassword(true);
+    try {
+      await updateUserPassword(data.newPassword);
+      toast({
+        title: "Password Updated",
+        description: "Your password has been changed successfully.",
+      });
+      passwordForm.reset();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: error.message || "An unknown error occurred.",
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
 
   if (authLoading) {
     return (
@@ -110,6 +141,7 @@ export function MyProfile() {
   }
 
   return (
+    <div className="grid gap-8 md:grid-cols-2">
     <Card className="bg-card border-primary/20">
       <CardHeader>
         <CardTitle className="font-headline text-2xl flex items-center gap-2">
@@ -121,12 +153,12 @@ export function MyProfile() {
           registrations and certificates.
         </CardDescription>
       </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+      <Form {...profileForm}>
+        <form onSubmit={profileForm.handleSubmit(onProfileSubmit)}>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <FormField
-                  control={form.control}
+                  control={profileForm.control}
                   name="displayName"
                   render={({ field }) => (
                     <FormItem>
@@ -139,7 +171,7 @@ export function MyProfile() {
                   )}
                 />
                  <FormField
-                  control={form.control}
+                  control={profileForm.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
@@ -157,7 +189,7 @@ export function MyProfile() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <FormField
-                  control={form.control}
+                  control={profileForm.control}
                   name="regNo"
                   render={({ field }) => (
                     <FormItem>
@@ -170,7 +202,7 @@ export function MyProfile() {
                   )}
                 />
                  <FormField
-                  control={form.control}
+                  control={profileForm.control}
                   name="mobileNo"
                   render={({ field }) => (
                     <FormItem>
@@ -185,7 +217,7 @@ export function MyProfile() {
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                  <FormField
-                  control={form.control}
+                  control={profileForm.control}
                   name="degree"
                   render={({ field }) => (
                     <FormItem>
@@ -198,7 +230,7 @@ export function MyProfile() {
                   )}
                 />
                  <FormField
-                  control={form.control}
+                  control={profileForm.control}
                   name="branch"
                   render={({ field }) => (
                     <FormItem>
@@ -211,7 +243,7 @@ export function MyProfile() {
                   )}
                 />
                  <FormField
-                  control={form.control}
+                  control={profileForm.control}
                   name="semester"
                   render={({ field }) => (
                     <FormItem>
@@ -224,7 +256,7 @@ export function MyProfile() {
                   )}
                 />
                  <FormField
-                  control={form.control}
+                  control={profileForm.control}
                   name="section"
                   render={({ field }) => (
                     <FormItem>
@@ -238,7 +270,7 @@ export function MyProfile() {
                 />
             </div>
              <FormField
-                control={form.control}
+                control={profileForm.control}
                 name="profile"
                 render={({ field }) => (
                     <FormItem>
@@ -258,13 +290,63 @@ export function MyProfile() {
                 />
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 animate-spin" />}
+            <Button type="submit" disabled={isUpdatingProfile}>
+                {isUpdatingProfile && <Loader2 className="mr-2 animate-spin" />}
               Save Changes
             </Button>
           </CardFooter>
         </form>
       </Form>
     </Card>
+    <Card className="bg-card border-primary/20">
+        <CardHeader>
+            <CardTitle className="font-headline text-2xl flex items-center gap-2">
+                <KeyRound className="h-6 w-6 text-primary" />
+                Change Password
+            </CardTitle>
+            <CardDescription>
+                Update your password here. You will not be logged out.
+            </CardDescription>
+        </CardHeader>
+        <Form {...passwordForm}>
+            <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}>
+                <CardContent className="space-y-6">
+                    <FormField
+                        control={passwordForm.control}
+                        name="newPassword"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>New Password</FormLabel>
+                                <FormControl>
+                                    <Input type="password" placeholder="••••••••" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={passwordForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Confirm New Password</FormLabel>
+                                <FormControl>
+                                    <Input type="password" placeholder="••••••••" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </CardContent>
+                <CardFooter>
+                    <Button type="submit" disabled={isUpdatingPassword}>
+                        {isUpdatingPassword && <Loader2 className="mr-2 animate-spin" />}
+                        Update Password
+                    </Button>
+                </CardFooter>
+            </form>
+        </Form>
+    </Card>
+    </div>
   );
 }

@@ -146,6 +146,16 @@ export const userProfileSchema = z.object({
 
 export type UserProfileFormData = z.infer<typeof userProfileSchema>;
 
+export const passwordSchema = z.object({
+  newPassword: z.string().min(6, 'Password must be at least 6 characters.'),
+  confirmPassword: z.string()
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"], // path of error
+});
+
+export type PasswordFormData = z.infer<typeof passwordSchema>;
+
 export interface UserData {
   uid: string;
   email: string;

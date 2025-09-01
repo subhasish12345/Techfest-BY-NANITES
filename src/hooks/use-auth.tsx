@@ -15,6 +15,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
+  updatePassword,
   User,
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
@@ -32,6 +33,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   registerForEvent: (eventId: string) => Promise<void>;
   updateUserProfile: (profileData: Partial<UserProfileFormData>) => Promise<void>;
+  updateUserPassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -230,8 +232,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const updateUserPassword = async (newPassword: string) => {
+    if (!auth.currentUser) {
+        throw new Error("You must be logged in to update your password.");
+    }
+    try {
+        await updatePassword(auth.currentUser, newPassword);
+    } catch (error: any) {
+        console.error("Password Update Error:", error);
+        // Firebase may require recent login for this operation.
+        if (error.code === 'auth/requires-recent-login') {
+            throw new Error("This action requires a recent login. Please log out and log back in to change your password.");
+        }
+        throw new Error(error.message || "An unknown error occurred while updating the password.");
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, userData, loading, error, login, signup, logout, registerForEvent, updateUserProfile }}>
+    <AuthContext.Provider value={{ user, userData, loading, error, login, signup, logout, registerForEvent, updateUserProfile, updateUserPassword }}>
       {children}
     </AuthContext.Provider>
   );
