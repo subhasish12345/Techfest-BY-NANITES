@@ -1,10 +1,9 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BarChart2, Users, Calendar, PlusCircle, Edit, Trash2 } from "lucide-react";
+import { BarChart2, Users, Calendar, Edit, Trash2 } from "lucide-react";
 import { collection, getDocs, deleteDoc, doc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
@@ -18,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ totalUsers: 0, totalEvents: 0, engagementRate: "0%" });
+  const [stats, setStats] = useState({ totalUsers: 0, totalEvents: 0, totalRegistrations: 0 });
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
@@ -27,9 +26,10 @@ export default function AdminDashboardPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Listen for real-time updates on events
-    const q = query(collection(db, "events"), orderBy("date", "asc"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    setLoading(true);
+
+    const qEvents = query(collection(db, "events"), orderBy("date", "asc"));
+    const unsubscribeEvents = onSnapshot(qEvents, (querySnapshot) => {
       const eventList = querySnapshot.docs.map(
         (doc) => ({ ...doc.data(), id: doc.id } as Event)
       );
@@ -41,24 +41,22 @@ export default function AdminDashboardPage() {
         setLoadingEvents(false);
     });
 
-    // Fetch one-time analytics data
-    async function getAnalytics() {
-      setLoading(true);
-      try {
-        const usersSnapshot = await getDocs(collection(db, "users"));
-        const totalUsers = usersSnapshot.size;
-        const engagementRate = "65.8%"; // Placeholder
-
-        setStats(prevStats => ({ ...prevStats, totalUsers, engagementRate }));
-      } catch (error) {
-        console.error("Failed to fetch admin analytics:", error);
-      } finally {
+    const qUsers = query(collection(db, "users"));
+    const unsubscribeUsers = onSnapshot(qUsers, (querySnapshot) => {
+        const users = querySnapshot.docs.map(doc => doc.data());
+        const totalUsers = users.length;
+        const totalRegistrations = users.reduce((acc, user) => acc + (user.registeredEvents?.length || 0), 0);
+        setStats(prevStats => ({ ...prevStats, totalUsers, totalRegistrations }));
         setLoading(false);
-      }
-    }
-    getAnalytics();
+    }, (error) => {
+        console.error("Failed to fetch users in real-time:", error);
+        setLoading(false);
+    });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => {
+        unsubscribeEvents();
+        unsubscribeUsers();
+    };
   }, []);
   
   const handleDeleteClick = (eventId: string) => {
@@ -74,7 +72,6 @@ export default function AdminDashboardPage() {
         title: "Event Deleted",
         description: "The event has been successfully removed.",
       });
-      // No need to fetchEvents() here, onSnapshot will handle the update
     } catch (error) {
       toast({
         variant: "destructive",
@@ -92,7 +89,7 @@ export default function AdminDashboardPage() {
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -112,7 +109,7 @@ export default function AdminDashboardPage() {
         </Card>
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
                 <BarChart2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -153,7 +150,7 @@ export default function AdminDashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -168,17 +165,17 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{stats.totalEvents}</div>
-                <p className="text-xs text-muted-foreground">Total events created</p>
+                <p className="text-xs text-muted-foreground">Total events in the catalog</p>
             </CardContent>
         </Card>
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Event Registrations</CardTitle>
                 <BarChart2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{stats.engagementRate}</div>
-                <p className="text-xs text-muted-foreground">Average across all events</p>
+                <div className="text-2xl font-bold">{stats.totalRegistrations}</div>
+                <p className="text-xs text-muted-foreground">Across all users and events</p>
             </CardContent>
         </Card>
       </div>
@@ -187,14 +184,8 @@ export default function AdminDashboardPage() {
         <CardHeader className="flex flex-row items-center justify-between">
             <div>
                 <CardTitle>Manage Events</CardTitle>
-                <CardDescription>Create, edit, or delete festival events.</CardDescription>
+                <CardDescription>Edit or delete festival events.</CardDescription>
             </div>
-            <Button asChild>
-                <Link href="/admin/events/new">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add New Event
-                </Link>
-            </Button>
         </CardHeader>
         <CardContent>
             {loadingEvents ? (
@@ -269,5 +260,3 @@ export default function AdminDashboardPage() {
       </AlertDialog>
     </>
   );
-
-    

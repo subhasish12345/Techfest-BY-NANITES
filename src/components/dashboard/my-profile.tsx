@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -25,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { userProfileSchema, type UserProfileFormData } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, User } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { Textarea } from "../ui/textarea";
@@ -37,19 +36,37 @@ export function MyProfile() {
 
   const form = useForm<UserProfileFormData>({
     resolver: zodResolver(userProfileSchema),
-    values: {
-      displayName: userData?.displayName || "",
-      email: userData?.email || "",
-      regNo: userData?.regNo || "",
-      degree: userData?.degree || "",
-      branch: userData?.branch || "",
-      semester: userData?.semester || "",
-      section: userData?.section || "",
-      mobileNo: userData?.mobileNo || "",
-      profile: userData?.profile || "",
-      profilePhoto: userData?.profilePhoto || "",
+    defaultValues: {
+      displayName: "",
+      email: "",
+      regNo: "",
+      degree: "",
+      branch: "",
+      semester: "",
+      section: "",
+      mobileNo: "",
+      profile: "",
+      profilePhoto: "",
     },
   });
+
+  useEffect(() => {
+    if (userData) {
+      form.reset({
+        displayName: userData.displayName || "",
+        email: userData.email || "",
+        regNo: userData.regNo || "",
+        degree: userData.degree || "",
+        branch: userData.branch || "",
+        semester: userData.semester || "",
+        section: userData.section || "",
+        mobileNo: userData.mobileNo || "",
+        profile: userData.profile || "",
+        profilePhoto: userData.profilePhoto || "",
+      });
+    }
+  }, [userData, form]);
+
 
   const onSubmit = async (data: UserProfileFormData) => {
     setIsLoading(true);

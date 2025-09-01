@@ -3,9 +3,8 @@ import { ProfileHeader } from "@/components/dashboard/profile-header";
 import { MySchedule } from "@/components/dashboard/my-schedule";
 import { DashboardAnalytics } from "@/components/dashboard/analytics";
 import { AiRecommendations } from "@/components/dashboard/ai-recommendations";
-import { MyCertificates } from "@/components/dashboard/my-certificates";
 import { MyProfile } from "@/components/dashboard/my-profile";
-import { BarChart2, Bot, Calendar, Award, User } from "lucide-react";
+import { BarChart2, Bot, Calendar, User } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default function DashboardPage() {
@@ -15,7 +14,7 @@ export default function DashboardPage() {
       <Tabs defaultValue="analytics" className="mt-8">
         <div className="relative">
              <ScrollArea>
-                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-5">
+                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
                     <TabsTrigger value="profile">
                         <User className="mr-2 h-4 w-4" />
                         My Profile
@@ -32,10 +31,6 @@ export default function DashboardPage() {
                         <Bot className="mr-2 h-4 w-4" />
                         AI Recommendations
                     </TabsTrigger>
-                    <TabsTrigger value="certificates">
-                        <Award className="mr-2 h-4 w-4" />
-                        My Certificates
-                    </TabsTrigger>
                 </TabsList>
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
@@ -51,9 +46,6 @@ export default function DashboardPage() {
         </TabsContent>
         <TabsContent value="ai-recommendations" className="mt-6">
           <AiRecommendations />
-        </TabsContent>
-        <TabsContent value="certificates" className="mt-6">
-            <MyCertificates />
         </TabsContent>
       </Tabs>
     </div>
