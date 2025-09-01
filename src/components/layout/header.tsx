@@ -79,13 +79,14 @@ export function Header() {
           </SheetTrigger>
           <SheetContent side="right">
              <SheetHeader>
-                <SheetTitle className="sr-only">Menu</SheetTitle>
-                <Link href="/" className="flex items-center gap-2 self-start">
-                    <Code className="h-8 w-8 text-primary" />
-                    <span className="font-headline text-xl font-bold text-primary">
-                    NANITES
-                    </span>
-                </Link>
+                <SheetTitle>
+                    <Link href="/" className="flex items-center gap-2 self-start">
+                        <Code className="h-8 w-8 text-primary" />
+                        <span className="font-headline text-xl font-bold text-primary">
+                        NANITES
+                        </span>
+                    </Link>
+                </SheetTitle>
              </SheetHeader>
              <Separator className="my-4" />
             <div className="flex h-full flex-col justify-between">
