@@ -33,7 +33,7 @@ export function EventForm({ eventId }: EventFormProps) {
   const isEditing = !!eventId;
 
   const form = useForm<EventFormData>({
-    resolver: zodResolver(eventSchema),
+    resolver: zodResolver(eventSchema.omit({ image: true })),
     defaultValues: {
       title: "",
       description: "",
@@ -86,21 +86,13 @@ export function EventForm({ eventId }: EventFormProps) {
     }
   }, [eventId, form, isEditing, router, toast]);
 
-  const onSubmit = async (data: EventFormData) => {
+  const onSubmit = async (data: Omit<EventFormData, 'image'>) => {
     setIsLoading(true);
-
-    if (!isEditing && !data.image) {
-        toast({ variant: 'destructive', title: 'Validation Error', description: 'An event image is required.'});
-        setIsLoading(false);
-        return;
-    }
 
     const formData = new FormData();
     
     Object.entries(data).forEach(([key, value]) => {
-      if (key === 'image' && value) {
-        formData.append(key, value);
-      } else if (key === 'prizes' && Array.isArray(value)) {
+      if (key === 'prizes' && Array.isArray(value)) {
         formData.append(key, JSON.stringify(value));
       } else if (key === 'rules' && Array.isArray(value)) {
         value.forEach((item: string) => formData.append(`${key}[]`, item));
@@ -204,7 +196,7 @@ export function EventForm({ eventId }: EventFormProps) {
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select event type" />
-                                    </SelectTrigger>
+                                    </Trigger>
                                     </FormControl>
                                     <SelectContent>
                                         <SelectItem value="technical">Technical</SelectItem>
@@ -245,22 +237,6 @@ export function EventForm({ eventId }: EventFormProps) {
                         )}
                     />
                 </div>
-                 <FormField
-                    control={form.control}
-                    name="image"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Event Image</FormLabel>
-                        <FormControl>
-                           <Input type="file" onChange={(e) => field.onChange(e.target.files ? e.target.files[0] : null)} />
-                        </FormControl>
-                        <FormDescription>
-                            Upload a high-quality image for the event banner.
-                        </FormDescription>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
                  <div>
                     <FormLabel>Rules</FormLabel>
                     <div className="space-y-2 mt-2">

@@ -181,8 +181,8 @@ export interface EventRegistration {
   userId: string;
   userName: string;
   userEmail: string;
-  regNo?: string;
-  branch?: string;
-  semester?: string;
+  regNo: string;
+  branch: string;
+  semester: string;
   registeredAt: Timestamp;
 }
