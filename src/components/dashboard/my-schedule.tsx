@@ -113,7 +113,7 @@ export function MySchedule() {
             <TableBody>
               {registeredEvents.map((event) => (
                 <TableRow key={event.id}>
-                  <TableCell className="font-medium text-primary-foreground">{event.title}</TableCell>
+                  <TableCell className="font-medium text-foreground">{event.title}</TableCell>
                   <TableCell>
                       <Badge variant="outline" className="border-accent text-accent font-code">{event.category}</Badge>
                   </TableCell>
