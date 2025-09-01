@@ -182,9 +182,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           userId: user.uid,
           userName: userData.displayName,
           userEmail: userData.email,
-          regNo: userData.regNo,
-          branch: userData.branch,
-          semester: userData.semester,
+          regNo: userData.regNo || '',
+          branch: userData.branch || '',
+          semester: userData.semester || '',
           registeredAt: serverTimestamp() as any,
         };
         transaction.set(registrationRef, registrationData);
