@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Rocket } from "lucide-react";
 import { CountdownTimer } from "./countdown-timer";
+import { MeteorShower } from "./meteor-shower";
 
 export function Hero() {
   const festDate = new Date("2024-10-26T09:00:00");
@@ -19,6 +20,7 @@ export function Hero() {
         data-ai-hint="abstract technology"
       />
       <div className="absolute inset-0 bg-background/70 -z-10 backdrop-blur-sm"></div>
+      <MeteorShower />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="font-headline text-4xl font-bold tracking-tight text-white sm:text-6xl animate-glow">
