@@ -1,40 +1,39 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
+    
     // Helper function to check if a user is an admin
     function isAdmin() {
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Users can only read/write their own data. Admins can read anyone's data.
+    // Users can only read and write their own data. Admins can read anyone's data.
     match /users/{userId} {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if isAdmin(); // Only admins can delete users
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Anyone can read events, but only admins can create, update, or delete them.
+    // Events are public to read, but only admins can modify them.
     match /events/{eventId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow write: if request.auth != null && isAdmin();
 
-      // Rules for the registrations subcollection
+      // Rules for the 'registrations' sub-collection within each event
       match /registrations/{userId} {
-        allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        // Any authenticated user can create their own registration document.
         allow create: if request.auth != null && request.auth.uid == userId;
-        allow delete: if isAdmin(); // Only admins can manage registrations
+        // Only the user themselves or an admin can read the registration details.
+        allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        // No one can update or delete a registration from the client.
+        allow update, delete: if false;
       }
     }
 
-    // Anyone can read updates, but only admins can create or delete them.
+    // Live updates are public to read, but only admins can modify them.
     match /updates/{updateId} {
       allow read: if true;
-      allow create, delete: if isAdmin();
+      allow write: if request.auth != null && isAdmin();
     }
   }
 }
