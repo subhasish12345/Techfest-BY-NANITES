@@ -18,7 +18,7 @@ import {
   User,
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-import { doc, setDoc, getDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, arrayUnion, serverTimestamp, runTransaction } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import type { UserData, UserProfileFormData, EventRegistration } from "@/lib/types";
 
@@ -166,32 +166,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setLoading(true);
     try {
-      // 1. Add event to the user's registered list
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        registeredEvents: arrayUnion(eventId)
+      await runTransaction(db, async (transaction) => {
+        const userRef = doc(db, "users", user.uid);
+        const registrationRef = doc(db, `events/${eventId}/registrations`, user.uid);
+
+        // 1. Update user's registered events list
+        transaction.update(userRef, {
+          registeredEvents: arrayUnion(eventId)
+        });
+
+        // 2. Create a registration record for the event
+        const registrationData: EventRegistration = {
+          userId: user.uid,
+          userName: userData.displayName,
+          userEmail: userData.email,
+          regNo: userData.regNo,
+          branch: userData.branch,
+          semester: userData.semester,
+          registeredAt: serverTimestamp() as any,
+        };
+        transaction.set(registrationRef, registrationData);
       });
 
-      // 2. Create a registration record in the event's sub-collection
-      const registrationRef = doc(db, `events/${eventId}/registrations`, user.uid);
-      const registrationData: EventRegistration = {
-        userId: user.uid,
-        userName: userData.displayName,
-        userEmail: userData.email,
-        regNo: userData.regNo,
-        branch: userData.branch,
-        semester: userData.semester,
-        registeredAt: serverTimestamp() as any,
-      };
-      await setDoc(registrationRef, registrationData);
-
-      // 3. Refresh user data locally
+      // 3. Refresh user data locally after successful transaction
+      const userRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
         setUserData(userDoc.data() as UserData);
       }
+
     } catch (e:any) {
-      console.error(e);
+      console.error("Transaction failed: ", e);
       throw new Error(e.message || "An unknown error occurred during registration.");
     } finally {
         setLoading(false);

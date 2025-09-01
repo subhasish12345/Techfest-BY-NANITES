@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
   Card,
@@ -26,16 +26,18 @@ import type { Event } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QrCode } from "lucide-react";
 import { QrCodeDialog } from "./qr-code-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 export function MySchedule() {
   const { user, userData, loading: authLoading } = useAuth();
   const [registeredEvents, setRegisteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [qrCodeData, setQrCodeData] = useState<{ eventTitle: string, qrValue: string } | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchRegisteredEvents = async () => {
-      if (!userData?.registeredEvents || userData.registeredEvents.length === 0) {
+      if (!userData || !userData.registeredEvents || userData.registeredEvents.length === 0) {
         setRegisteredEvents([]);
         setLoading(false);
         return;
@@ -43,32 +45,29 @@ export function MySchedule() {
       
       setLoading(true);
       try {
-        const eventsData: Event[] = [];
-        // Firestore 'in' query is limited to 10 items. We fetch docs one by one.
-        // For larger scale, a different approach might be needed.
-        for (const eventId of userData.registeredEvents) {
-          const eventDocRef = doc(db, 'events', eventId);
-          const eventDoc = await getDoc(eventDocRef);
-          if(eventDoc.exists()){
-            eventsData.push({ id: eventDoc.id, ...eventDoc.data() } as Event);
-          }
-        }
+        // Use a single 'in' query to fetch all registered events at once.
+        // Note: 'in' queries are limited to 30 items by Firestore. For more, pagination would be needed.
+        const eventsRef = collection(db, 'events');
+        const q = query(eventsRef, where('__name__', 'in', userData.registeredEvents));
+        const querySnapshot = await getDocs(q);
+        const eventsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
         setRegisteredEvents(eventsData);
       } catch (error) {
         console.error("Error fetching registered events: ", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch your schedule.' });
       } finally {
         setLoading(false);
       }
     };
     
-    if (!authLoading) {
+    if (!authLoading && userData) {
         fetchRegisteredEvents();
     }
-  }, [userData, authLoading]);
+  }, [userData, authLoading, toast]);
 
   const handleShowQrCode = (event: Event) => {
     if (!user) return;
-    const qrValue = JSON.stringify({ userId: user.uid, eventId: event.id });
+    const qrValue = JSON.stringify({ userId: user.uid, eventId: event.id, eventTitle: event.title });
     setQrCodeData({ eventTitle: event.title, qrValue });
   };
 
@@ -134,7 +133,7 @@ export function MySchedule() {
             </TableBody>
           </Table>
         ) : (
-          <p className="text-muted-foreground">You haven't registered for any events yet. Check out the <a href="/events" className="text-primary underline">event catalog</a>!</p>
+          <p className="text-muted-foreground text-center py-8">You haven't registered for any events yet. Check out the <a href="/events" className="text-primary underline">event catalog</a>!</p>
         )}
       </CardContent>
     </Card>

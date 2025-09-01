@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
   Card,
@@ -35,32 +35,27 @@ export function MyCertificates() {
       
       setLoading(true);
       try {
-        const eventsData: Event[] = [];
-        // In a real app, you'd filter for events where attendance was marked.
-        // For now, we assume all registered events are "completed".
-        for (const eventId of userData.registeredEvents) {
-          const eventDocRef = doc(db, 'events', eventId);
-          const eventDoc = await getDoc(eventDocRef);
-          if(eventDoc.exists()){
-            // Assuming events that are not "upcoming" are completed for this demo
-             const event = { id: eventDoc.id, ...eventDoc.data() } as Event
-             if(event.status !== 'upcoming') {
-                eventsData.push(event);
-             }
-          }
-        }
+        const eventsRef = collection(db, 'events');
+        // Fetch all events that the user is registered for AND are completed.
+        const q = query(eventsRef, 
+            where('__name__', 'in', userData.registeredEvents),
+            where('status', '==', 'completed')
+        );
+        const querySnapshot = await getDocs(q);
+        const eventsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
         setCompletedEvents(eventsData);
       } catch (error) {
         console.error("Error fetching completed events: ", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch your certificates.' });
       } finally {
         setLoading(false);
       }
     };
     
-    if (!authLoading) {
+    if (!authLoading && userData) {
         fetchCompletedEvents();
     }
-  }, [userData, authLoading]);
+  }, [userData, authLoading, toast]);
 
   const handleDownload = (eventName: string) => {
     // In a real application, this would trigger a PDF/Image generation service

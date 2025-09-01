@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart2, Users, Calendar, PlusCircle, Edit, Trash2 } from "lucide-react";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import Image from "next/image";
@@ -26,29 +26,30 @@ export default function AdminDashboardPage() {
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchEvents = async () => {
-    setLoadingEvents(true);
-    const eventsCollection = collection(db, "events");
-    const eventSnapshot = await getDocs(eventsCollection);
-    const eventList = eventSnapshot.docs.map(
-      (doc) => ({ ...doc.data(), id: doc.id } as Event)
-    );
-    setEvents(eventList);
-    setLoadingEvents(false);
-  };
-
   useEffect(() => {
+    // Listen for real-time updates on events
+    const q = query(collection(db, "events"), orderBy("date", "asc"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const eventList = querySnapshot.docs.map(
+        (doc) => ({ ...doc.data(), id: doc.id } as Event)
+      );
+      setEvents(eventList);
+      setStats(prevStats => ({ ...prevStats, totalEvents: eventList.length }));
+      setLoadingEvents(false);
+    }, (error) => {
+        console.error("Failed to fetch events in real-time:", error);
+        setLoadingEvents(false);
+    });
+
+    // Fetch one-time analytics data
     async function getAnalytics() {
       setLoading(true);
       try {
         const usersSnapshot = await getDocs(collection(db, "users"));
-        const eventsSnapshot = await getDocs(collection(db, "events"));
-
         const totalUsers = usersSnapshot.size;
-        const totalEvents = eventsSnapshot.size;
         const engagementRate = "65.8%"; // Placeholder
 
-        setStats({ totalUsers, totalEvents, engagementRate });
+        setStats(prevStats => ({ ...prevStats, totalUsers, engagementRate }));
       } catch (error) {
         console.error("Failed to fetch admin analytics:", error);
       } finally {
@@ -56,7 +57,8 @@ export default function AdminDashboardPage() {
       }
     }
     getAnalytics();
-    fetchEvents();
+
+    return () => unsubscribe(); // Cleanup subscription on unmount
   }, []);
   
   const handleDeleteClick = (eventId: string) => {
@@ -72,7 +74,7 @@ export default function AdminDashboardPage() {
         title: "Event Deleted",
         description: "The event has been successfully removed.",
       });
-      fetchEvents(); // Refresh the list
+      // No need to fetchEvents() here, onSnapshot will handle the update
     } catch (error) {
       toast({
         variant: "destructive",
