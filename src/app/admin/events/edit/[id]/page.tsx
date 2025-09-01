@@ -1,6 +1,6 @@
 
 "use client"
-import { EventForm } from "../event-form";
+import { EventForm } from "@/app/admin/events/event-form";
 
 export default function EditEventPage({ params }: { params: { id: string } }) {
     // This form will now pre-populate from dummy data
