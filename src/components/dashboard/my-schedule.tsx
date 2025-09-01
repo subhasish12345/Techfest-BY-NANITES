@@ -2,8 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import {
   Card,
   CardContent,
@@ -23,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import type { Event } from "@/lib/types";
+import { events as dummyEvents } from "@/lib/data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QrCode } from "lucide-react";
 import { QrCodeDialog } from "./qr-code-dialog";
@@ -36,7 +35,7 @@ export function MySchedule() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchRegisteredEvents = async () => {
+    const fetchRegisteredEvents = () => {
       if (!userData || !userData.registeredEvents || userData.registeredEvents.length === 0) {
         setRegisteredEvents([]);
         setLoading(false);
@@ -45,15 +44,10 @@ export function MySchedule() {
       
       setLoading(true);
       try {
-        // Use a single 'in' query to fetch all registered events at once.
-        // Note: 'in' queries are limited to 30 items by Firestore. For more, pagination would be needed.
-        const eventsRef = collection(db, 'events');
-        const q = query(eventsRef, where('__name__', 'in', userData.registeredEvents));
-        const querySnapshot = await getDocs(q);
-        const eventsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+        const eventsData = dummyEvents.filter(event => userData.registeredEvents.includes(event.id));
         setRegisteredEvents(eventsData);
       } catch (error) {
-        console.error("Error fetching registered events: ", error);
+        console.error("Error fetching registered events from dummy data: ", error);
         toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch your schedule.' });
       } finally {
         setLoading(false);
@@ -62,6 +56,8 @@ export function MySchedule() {
     
     if (!authLoading && userData) {
         fetchRegisteredEvents();
+    } else if (!authLoading) {
+        setLoading(false);
     }
   }, [userData, authLoading, toast]);
 
@@ -148,3 +144,5 @@ export function MySchedule() {
     </>
   );
 }
+
+    

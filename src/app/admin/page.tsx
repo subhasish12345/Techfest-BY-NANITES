@@ -1,14 +1,16 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart2, Users, Calendar, Edit, Trash2 } from "lucide-react";
-import { collection, getDocs, deleteDoc, doc, onSnapshot, query, orderBy } from "firebase/firestore";
+import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import Image from "next/image";
 import type { Event } from "@/lib/types";
+import { events as dummyEvents } from "@/lib/data";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,8 +19,8 @@ import { useToast } from "@/hooks/use-toast";
 
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ totalUsers: 0, totalEvents: 0, totalRegistrations: 0 });
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ totalUsers: 150, totalEvents: 20, totalRegistrations: 450 });
+  const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -26,37 +28,13 @@ export default function AdminDashboardPage() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Using dummy data
     setLoading(true);
-
-    const qEvents = query(collection(db, "events"), orderBy("date", "asc"));
-    const unsubscribeEvents = onSnapshot(qEvents, (querySnapshot) => {
-      const eventList = querySnapshot.docs.map(
-        (doc) => ({ ...doc.data(), id: doc.id } as Event)
-      );
-      setEvents(eventList);
-      setStats(prevStats => ({ ...prevStats, totalEvents: eventList.length }));
-      setLoadingEvents(false);
-    }, (error) => {
-        console.error("Failed to fetch events in real-time:", error);
-        setLoadingEvents(false);
-    });
-
-    const qUsers = query(collection(db, "users"));
-    const unsubscribeUsers = onSnapshot(qUsers, (querySnapshot) => {
-        const users = querySnapshot.docs.map(doc => doc.data());
-        const totalUsers = users.length;
-        const totalRegistrations = users.reduce((acc, user) => acc + (user.registeredEvents?.length || 0), 0);
-        setStats(prevStats => ({ ...prevStats, totalUsers, totalRegistrations }));
-        setLoading(false);
-    }, (error) => {
-        console.error("Failed to fetch users in real-time:", error);
-        setLoading(false);
-    });
-
-    return () => {
-        unsubscribeEvents();
-        unsubscribeUsers();
-    };
+    setLoadingEvents(true);
+    setEvents(dummyEvents);
+    setStats({ totalUsers: 150, totalEvents: dummyEvents.length, totalRegistrations: 450 });
+    setLoading(false);
+    setLoadingEvents(false);
   }, []);
   
   const handleDeleteClick = (eventId: string) => {
@@ -67,16 +45,19 @@ export default function AdminDashboardPage() {
   const handleDeleteConfirm = async () => {
     if (!eventToDelete) return;
     try {
+      // This will still attempt to delete from Firestore.
+      // If permissions fail, this specific action will show an error.
       await deleteDoc(doc(db, "events", eventToDelete));
+      setEvents(events.filter(event => event.id !== eventToDelete));
       toast({
         title: "Event Deleted",
-        description: "The event has been successfully removed.",
+        description: "The event has been successfully removed from the view.",
       });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to delete the event. Please try again.",
+        description: "Failed to delete the event. Check permissions.",
       });
     } finally {
       setShowDeleteDialog(false);
@@ -260,3 +241,5 @@ export default function AdminDashboardPage() {
       </AlertDialog>
     </>
   );
+
+    

@@ -18,8 +18,7 @@ import { Bot, Lightbulb, Workflow, BookOpen, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { type Event } from "@/lib/types";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { events as dummyEvents } from "@/lib/data";
 import { Skeleton } from "../ui/skeleton";
 import Link from "next/link";
 
@@ -33,7 +32,7 @@ export function AiRecommendations() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchRegisteredEvents = async () => {
+    const fetchRegisteredEvents = () => {
       if (!userData || !userData.registeredEvents || userData.registeredEvents.length === 0) {
         setRegisteredEvents([]);
         setIsFetchingEvents(false);
@@ -42,13 +41,10 @@ export function AiRecommendations() {
       
       setIsFetchingEvents(true);
       try {
-        const eventsRef = collection(db, 'events');
-        const q = query(eventsRef, where('__name__', 'in', userData.registeredEvents));
-        const querySnapshot = await getDocs(q);
-        const eventsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+        const eventsData = dummyEvents.filter(event => userData.registeredEvents.includes(event.id));
         setRegisteredEvents(eventsData);
       } catch (error) {
-        console.error("Error fetching registered events: ", error);
+        console.error("Error fetching registered events from dummy data: ", error);
         toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch your registered events.' });
       } finally {
         setIsFetchingEvents(false);
@@ -191,3 +187,5 @@ export function AiRecommendations() {
     </Card>
   );
 }
+
+    

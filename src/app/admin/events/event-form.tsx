@@ -5,11 +5,10 @@ import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { eventSchema, type EventFormData, type Event, eventCategoriesList } from "@/lib/types";
 import { addEvent, updateEvent } from "@/app/actions/event-actions";
+import { events as dummyEvents } from "@/lib/data";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -58,31 +57,26 @@ export function EventForm({ eventId }: EventFormProps) {
 
   useEffect(() => {
     if (isEditing) {
-      const fetchEventData = async () => {
+      const fetchEventData = () => {
         setIsFetching(true);
-        try {
-          const eventDocRef = doc(db, 'events', eventId);
-          const eventDoc = await getDoc(eventDocRef);
-          if (eventDoc.exists()) {
-            const eventData = eventDoc.data() as Event;
+        const eventData = dummyEvents.find(e => e.id === eventId);
+        if (eventData) {
             const fetchedData = {
                 ...eventData,
-                image: undefined, // Don't try to load the remote image URL into the file input
+                image: undefined,
                 prizes: eventData.prizes || [{ position: "1st Prize", prize: "" }],
                 rules: eventData.rules || ["Rule 1"]
             };
             form.reset(fetchedData);
-          } else {
-            toast({ variant: 'destructive', title: 'Error', description: 'Event not found.' });
-            router.push('/admin/events');
-          }
-        } catch (error) {
-          toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch event data.' });
-        } finally {
-          setIsFetching(false);
+        } else {
+            toast({ variant: 'destructive', title: 'Error', description: 'Event not found in dummy data.' });
+            router.push('/admin');
         }
+        setIsFetching(false);
       };
       fetchEventData();
+    } else {
+        setIsFetching(false);
     }
   }, [eventId, form, isEditing, router, toast]);
 
@@ -103,11 +97,13 @@ export function EventForm({ eventId }: EventFormProps) {
 
     try {
       if (isEditing) {
+        // NOTE: This will still try to write to Firestore and may fail if permissions are not set.
         await updateEvent(eventId, formData);
-        toast({ title: "Success", description: "Event updated successfully." });
+        toast({ title: "Success", description: "Event update simulated. Check Firestore for actual changes." });
       } else {
+        // NOTE: This will still try to write to Firestore and may fail if permissions are not set.
         await addEvent(formData);
-        toast({ title: "Success", description: "Event created successfully." });
+        toast({ title: "Success", description: "Event creation simulated. Check Firestore for actual changes." });
       }
       router.push("/admin");
       router.refresh();
@@ -115,7 +111,7 @@ export function EventForm({ eventId }: EventFormProps) {
       toast({
         variant: "destructive",
         title: "Operation Failed",
-        description: error.message || "An unknown error occurred.",
+        description: error.message || "An unknown error occurred. This is expected if permissions are not set.",
       });
     } finally {
       setIsLoading(false);
@@ -315,3 +311,5 @@ export function EventForm({ eventId }: EventFormProps) {
     </Card>
   );
 }
+
+    

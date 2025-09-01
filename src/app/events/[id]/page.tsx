@@ -4,8 +4,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import type { Event } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,36 +26,13 @@ export default function EventDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    const fetchEvent = async () => {
-        setLoading(true);
-        let foundEvent: Event | null = null;
-        
-        try {
-            const eventDocRef = doc(db, 'events', id);
-            const eventDoc = await getDoc(eventDocRef);
-            if (eventDoc.exists()) {
-                foundEvent = { id: eventDoc.id, ...eventDoc.data() } as Event;
-            }
-        } catch (error) {
-            console.log("Firestore fetch failed, will check fallback data.", error);
-        }
-
-        if (!foundEvent) {
-            const fallbackEvent = dummyEvents.find(e => e.id === id);
-            if (fallbackEvent) {
-                foundEvent = fallbackEvent;
-            }
-        }
-        
-        setEvent(foundEvent);
-        
-        if (!foundEvent) {
-            console.error("No such document!");
-        }
-
-        setLoading(false);
-    };
-    fetchEvent();
+    setLoading(true);
+    const foundEvent = dummyEvents.find(e => e.id === id) || null;
+    setEvent(foundEvent);
+    if (!foundEvent) {
+        console.error("No such event in dummy data!");
+    }
+    setLoading(false);
   }, [id]);
 
   if (loading) {
@@ -195,3 +170,5 @@ export default function EventDetailPage() {
     </div>
   );
 }
+
+    

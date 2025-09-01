@@ -2,8 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { EventCard } from "@/components/events/event-card";
 import { Filters } from "@/components/events/filters";
 import type { Event } from "@/lib/types";
@@ -17,35 +15,11 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true);
-      try {
-        const eventsCollection = collection(db, "events");
-        const eventSnapshot = await getDocs(eventsCollection);
-        
-        let events: Event[];
-        if (!eventSnapshot.empty) {
-          events = eventSnapshot.docs.map(
-            (doc) => ({ id: doc.id, ...doc.data() } as Event)
-          );
-        } else {
-          // Fallback to dummy data if Firestore is empty
-          console.log("Firestore is empty, using fallback dummy data.");
-          events = dummyEvents;
-        }
-        
-        setAllEvents(events);
-        setFilteredEvents(events);
-      } catch (error) {
-        console.error("Error fetching events, using fallback dummy data:", error);
-        // Fallback to dummy data on error
-        setAllEvents(dummyEvents);
-        setFilteredEvents(dummyEvents);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchEvents();
+    // Use dummy data directly
+    setLoading(true);
+    setAllEvents(dummyEvents);
+    setFilteredEvents(dummyEvents);
+    setLoading(false);
   }, []);
 
   return (
@@ -86,3 +60,5 @@ export default function EventsPage() {
     </div>
   );
 }
+
+    

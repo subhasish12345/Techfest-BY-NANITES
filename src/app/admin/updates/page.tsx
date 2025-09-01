@@ -8,9 +8,6 @@ import {
   collection,
   addDoc,
   serverTimestamp,
-  onSnapshot,
-  query,
-  orderBy,
   deleteDoc,
   doc,
 } from "firebase/firestore";
@@ -53,6 +50,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+
+const dummyUpdates: Update[] = [
+    { id: '1', message: 'The keynote speaker for the closing ceremony has been announced! Welcome Dr. Evelyn Reed.', timestamp: { toDate: () => new Date(Date.now() - 3600000) } as any },
+    { id: '2', message: 'Registration for the "Code Combat" hackathon closes in 2 hours. Grab your spot now!', timestamp: { toDate: () => new Date(Date.now() - 7200000) } as any },
+    { id: '3', message: 'Check out the new gallery section for highlights from Day 1.', timestamp: { toDate: () => new Date(Date.now() - 86400000) } as any },
+];
+
+
 export default function ManageUpdatesPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -69,26 +74,24 @@ export default function ManageUpdatesPage() {
   });
 
   useEffect(() => {
-    const q = query(collection(db, "updates"), orderBy("timestamp", "desc"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const updatesData: Update[] = [];
-      querySnapshot.forEach((doc) => {
-        updatesData.push({ id: doc.id, ...doc.data() } as Update);
-      });
-      setUpdates(updatesData);
-      setLoadingUpdates(false);
-    });
-
-    return () => unsubscribe();
+    // Using dummy data
+    setLoadingUpdates(true);
+    setUpdates(dummyUpdates);
+    setLoadingUpdates(false);
   }, []);
 
   const onSubmit = async (data: UpdateFormData) => {
     setIsLoading(true);
     try {
+      // NOTE: This will still try to write to Firestore and may fail if permissions are not set.
       await addDoc(collection(db, "updates"), {
         message: data.message,
         timestamp: serverTimestamp(),
       });
+      // Add to local state to simulate
+      const newUpdate = { id: Date.now().toString(), message: data.message, timestamp: { toDate: () => new Date() } as any};
+      setUpdates([newUpdate, ...updates]);
+
       toast({
         title: "Update Posted",
         description: "The new update is now live.",
@@ -99,7 +102,7 @@ export default function ManageUpdatesPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to post the update. Please try again.",
+        description: "Failed to post the update. Check permissions.",
       });
     } finally {
       setIsLoading(false);
@@ -114,7 +117,9 @@ export default function ManageUpdatesPage() {
   const handleDeleteConfirm = async () => {
     if (!updateToDelete) return;
     try {
+      // NOTE: This will still try to delete from Firestore and may fail if permissions are not set.
       await deleteDoc(doc(db, "updates", updateToDelete));
+      setUpdates(updates.filter(u => u.id !== updateToDelete));
       toast({
         title: "Update Deleted",
         description: "The update has been successfully deleted.",
@@ -123,7 +128,7 @@ export default function ManageUpdatesPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to delete the update. Please try again.",
+        description: "Failed to delete the update. Check permissions.",
       });
     } finally {
       setShowDeleteDialog(false);
@@ -243,3 +248,5 @@ export default function ManageUpdatesPage() {
     </div>
   );
 }
+
+    

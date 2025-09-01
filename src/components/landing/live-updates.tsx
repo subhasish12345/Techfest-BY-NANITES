@@ -2,32 +2,27 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bell, Rss } from "lucide-react";
 import type { Update } from "@/lib/types";
 import { Skeleton } from '../ui/skeleton';
+
+const dummyUpdates: Update[] = [
+    { id: '1', message: 'The keynote speaker for the closing ceremony has been announced! Welcome Dr. Evelyn Reed.', timestamp: { toDate: () => new Date(Date.now() - 3600000) } as any },
+    { id: '2', message: 'Registration for the "Code Combat" hackathon closes in 2 hours. Grab your spot now!', timestamp: { toDate: () => new Date(Date.now() - 7200000) } as any },
+    { id: '3', message: 'Check out the new gallery section for highlights from Day 1.', timestamp: { toDate: () => new Date(Date.now() - 86400000) } as any },
+];
+
 
 export function LiveUpdates() {
   const [updates, setUpdates] = useState<Update[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, "updates"), orderBy("timestamp", "desc"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const updatesData: Update[] = [];
-      querySnapshot.forEach((doc) => {
-        updatesData.push({ id: doc.id, ...doc.data() } as Update);
-      });
-      setUpdates(updatesData);
-      setLoading(false);
-    }, (error) => {
-      console.error("LiveUpdates Error: ", error);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    // Using dummy data
+    setLoading(true);
+    setUpdates(dummyUpdates);
+    setLoading(false);
   }, []);
 
   const formatTimestamp = (timestamp: any) => {
@@ -109,3 +104,5 @@ export function LiveUpdates() {
     </section>
   );
 }
+
+    
