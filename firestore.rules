@@ -1,38 +1,14 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Users can read and write their own data.
-    // Admins can read any user's data.
-    match /users/{userId} {
-      allow read: if request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-      allow write: if request.auth.uid == userId;
-    }
-
-    // Anyone can read events, updates, and sponsors.
-    // Only admins can create, update, or delete them.
-    match /events/{eventId} {
-      allow read: if true;
-      allow write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-
-      // This is the key rule:
-      // Allow an authenticated user to create their own registration document.
-      match /registrations/{userId} {
-        allow create: if request.auth.uid == userId;
-        allow read: if request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-        allow write, delete: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-      }
-    }
-
-    match /updates/{updateId} {
-      allow read: if true;
-      allow write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    match /sponsors/{sponsorId} {
-        allow read: if true;
-        allow write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    // Allow read and write access to all documents
+    // for development purposes.
+    // WARNING: This is insecure and should be replaced
+    // with proper security rules before production.
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }
