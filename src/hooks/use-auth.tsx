@@ -148,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       await setDoc(doc(db, "users", userCredential.user.uid), newUser);
       
-      setSuccessMessage("Account created! A verification link has been sent to your email. Please also check your spam or junk folder.");
+      setSuccessMessage("A verification email has been sent to your inbox. Please check your Spam or Junk folder if you don’t see it. Once you have verified your email, you can log in using your email and password.");
       await signOut(auth); // Sign out user until they verify
       router.push("/auth");
 
