@@ -10,6 +10,8 @@ export function Footer() {
   const [year, setYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
+    // This effect ensures the year is set on the client-side to avoid hydration mismatches,
+    // though for getFullYear() it's less of an issue than for other Date methods.
     setYear(new Date().getFullYear());
   }, []);
 
@@ -25,7 +27,7 @@ export function Footer() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © {year} NANITES TechFest. All rights reserved.
+              © 2024 NANITES TechFest. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <Link href="#" aria-label="Twitter">
