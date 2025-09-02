@@ -101,7 +101,7 @@ export default function EventDetailPage() {
               alt={event.title}
               fill
               priority
-              sizes="(max-width: 768px) 100vw, 50vw"
+              sizes="(max-width: 768px) 100vw, 60vw"
               style={{ objectFit: 'cover' }}
               data-ai-hint="event cover"
             />
@@ -170,5 +170,3 @@ export default function EventDetailPage() {
     </div>
   );
 }
-
-    

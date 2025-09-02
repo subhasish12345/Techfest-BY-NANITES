@@ -22,6 +22,7 @@ export function Gallery() {
                   src={image.src}
                   alt={image.alt}
                   fill
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                   className="object-cover transition-transform duration-500 ease-in-out hover:scale-110"
                   data-ai-hint="tech event"
                 />
@@ -34,4 +35,3 @@ export function Gallery() {
     </section>
   );
 }
-
