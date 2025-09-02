@@ -173,16 +173,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSuccessMessage(null);
     try {
         await sendPasswordResetEmail(auth, email);
-        setSuccessMessage("Password reset email sent! Check your inbox.");
+        setSuccessMessage("Password reset email successfully sent! Please check your inbox and spam folder.");
     } catch (e: any) {
-        if (e instanceof FirebaseError && e.code === 'auth/user-not-found') {
-            // For security, Firebase doesn't throw user-not-found by default on the client.
-            // This error might not trigger, but we keep it for completeness.
-            // The success message will be shown regardless to prevent email enumeration.
-            setSuccessMessage("If an account exists for this email, a password reset link has been sent.");
+        console.error("Password Reset Error:", e);
+        if (e instanceof FirebaseError) {
+             // To prevent email enumeration, we show a generic success message even for errors.
+             // The specific error is logged to the console for debugging.
+             if (e.code === 'auth/user-not-found') {
+                 console.error("Attempted password reset for non-existent user:", email);
+             }
+             setSuccessMessage("If an account with that email exists, a reset link has been sent. Please check your inbox and spam folder.");
         } else {
-            console.error("Password Reset Error:", e);
-            setSuccessMessage("If an account exists for this email, a password reset link has been sent.");
+             setSuccessMessage("If an account with that email exists, a reset link has been sent. Please check your inbox and spam folder.");
         }
     } finally {
         setLoading(false);
