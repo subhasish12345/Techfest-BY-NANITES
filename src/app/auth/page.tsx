@@ -238,7 +238,7 @@ function AuthPageContent() {
 
                             {error && !isPotentiallyAdmin && <p className="text-sm font-medium text-destructive">{error}</p>}
 
-                            <Button type="submit" className="w-full" disabled={loading}>
+                            <Button type="submit" className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 glow-shadow" disabled={loading}>
                                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {formType === "login" && "Log In"}
                                 {formType === "signup" && "Sign Up"}

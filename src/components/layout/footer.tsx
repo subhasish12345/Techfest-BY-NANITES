@@ -26,17 +26,18 @@ export function Footer() {
                 NANITES
               </span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 NANITES TechFest. All rights reserved.
-            </p>
+            <div className="text-sm text-muted-foreground text-center">
+              <p>© 2024 NANITES TechFest. All rights reserved.</p>
+              <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+            </div>
             <div className="flex items-center gap-4">
-              <Link href="#" aria-label="Twitter">
+              <Link href="https://x.com/Subhunew1Nayak?t=etWteaHNxNcUim6I600csQ&s=09" aria-label="Twitter" target="_blank" rel="noopener noreferrer">
                 <Twitter className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary hover:scale-110" />
               </Link>
-              <Link href="#" aria-label="GitHub">
+              <Link href="https://github.com/subhasish12345" aria-label="GitHub" target="_blank" rel="noopener noreferrer">
                 <Github className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary hover:scale-110" />
               </Link>
-              <Link href="#" aria-label="LinkedIn">
+              <Link href="https://www.linkedin.com/in/subhasish-nayak-67a257280?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
                 <Linkedin className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary hover:scale-110" />
               </Link>
             </div>
