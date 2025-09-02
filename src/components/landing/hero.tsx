@@ -18,7 +18,7 @@ export function Hero() {
         className="absolute top-0 left-0 w-full h-full object-cover -z-20"
         poster="https://picsum.photos/1920/1080?random=100"
       >
-        <source src="/videos/hero-background.mp4" type="video/mp4" />
+        <source src="/videos/bgvideo.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
       <div className="absolute inset-0 bg-background/70 -z-10 backdrop-blur-sm"></div>
