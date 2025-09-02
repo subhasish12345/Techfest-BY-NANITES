@@ -114,13 +114,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(userCredential.user, { displayName });
       
+      const adminEmails = ['admin@gmail.com', 'sadmisn@gmail.com'];
+
       const newUser: UserData = {
         uid: userCredential.user.uid,
         email,
         displayName,
         profile: 'I am a student interested in technology and innovation.',
         registeredEvents: [],
-        role: email === 'admin@gmail.com' ? 'admin' : 'user',
+        role: adminEmails.includes(email) ? 'admin' : 'user',
         regNo: '',
         degree: '',
         branch: '',
