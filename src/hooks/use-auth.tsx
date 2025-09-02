@@ -54,7 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
       setError(null);
-      setSuccessMessage(null);
+      // Do not clear success message on auth state change
+      // setSuccessMessage(null); 
       if (user && user.emailVerified) {
         setUser(user);
         const userDocRef = doc(db, "users", user.uid);
@@ -147,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       await setDoc(doc(db, "users", userCredential.user.uid), newUser);
       
-      setSuccessMessage("Account created! Please check your email to verify your account before logging in.");
+      setSuccessMessage("Account created! A verification link has been sent to your email. Please also check your spam or junk folder.");
       await signOut(auth); // Sign out user until they verify
       router.push("/auth");
 

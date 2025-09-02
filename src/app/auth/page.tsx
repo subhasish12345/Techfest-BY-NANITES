@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useSearchParams } from 'next/navigation';
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -24,7 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2, Info, MailCheck } from "lucide-react";
+import { Loader2, Info, MailCheck, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 
@@ -49,7 +49,15 @@ function AuthPageContent() {
     const searchParams = useSearchParams();
     const initialFormType = searchParams.get('form') === 'signup' ? 'signup' : 'login';
     const [formType, setFormType] = useState<"login" | "signup" | "forgotPassword">(initialFormType);
+    const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
     
+    useEffect(() => {
+        const mode = searchParams.get('mode');
+        if (mode === 'verifyEmail') {
+            setShowVerificationSuccess(true);
+        }
+    }, [searchParams]);
+
     const formSchemas = {
         login: loginSchema,
         signup: signupSchema,
@@ -66,6 +74,7 @@ function AuthPageContent() {
     });
 
     const onSubmit = (values: any) => {
+        setShowVerificationSuccess(false); // Hide verification message on new action
         if (formType === "login") {
             login(values.email, values.password);
         } else if (formType === "signup") {
@@ -77,6 +86,7 @@ function AuthPageContent() {
 
     const toggleFormType = (type: "login" | "signup" | "forgotPassword") => {
         setFormType(type);
+        setShowVerificationSuccess(false); // Hide verification message on form toggle
         form.reset();
     };
 
@@ -115,7 +125,16 @@ function AuthPageContent() {
                             </AlertDescription>
                         </Alert>
                     )}
-                    {successMessage && (
+                    {showVerificationSuccess && (
+                        <Alert variant="default" className="mb-4 bg-green-900/20 border-green-500/50">
+                            <CheckCircle className="h-4 w-4 text-green-400" />
+                            <AlertTitle className="text-green-300">Email Verified!</AlertTitle>
+                            <AlertDescription className="text-green-400">
+                                Your email has been successfully verified. You can now log in.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                    {successMessage && !showVerificationSuccess && (
                         <Alert variant="default" className="mb-4 bg-green-900/20 border-green-500/50">
                             <MailCheck className="h-4 w-4 text-green-400" />
                             <AlertTitle className="text-green-300">Success</AlertTitle>
