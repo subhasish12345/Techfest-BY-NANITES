@@ -16,6 +16,8 @@ import {
   signOut,
   updateProfile,
   updatePassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
   User,
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
@@ -28,9 +30,11 @@ interface AuthContextType {
   userData: UserData | null;
   loading: boolean;
   error: string | null;
+  successMessage: string | null;
   login: (email: string, pass: string) => Promise<void>;
   signup: (email: string, pass: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
   registerForEvent: (eventId: string) => Promise<void>;
   updateUserProfile: (profileData: Partial<UserProfileFormData>) => Promise<void>;
   updateUserPassword: (newPassword: string) => Promise<void>;
@@ -43,11 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
+      setError(null);
+      setSuccessMessage(null);
       if (user) {
         setUser(user);
         const userDocRef = doc(db, "users", user.uid);
@@ -55,7 +62,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (userDoc.exists()) {
           setUserData(userDoc.data() as UserData);
         } else {
-            // This case can be hit if a user is created in auth but the doc creation fails.
             const newUser: UserData = {
                 uid: user.uid,
                 email: user.email!,
@@ -78,7 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         setUserData(null);
       }
-      setError(null);
       setLoading(false);
     });
 
@@ -88,9 +93,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, pass: string) => {
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      router.push("/dashboard");
+      const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+      if (!userCredential.user.emailVerified) {
+          setError("Please verify your email before logging in. Check your inbox for a verification link.");
+          await signOut(auth); // Log out user until they are verified
+      } else {
+          router.push("/dashboard");
+      }
     } catch (e: any) {
        if (e instanceof FirebaseError) {
             if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
@@ -110,9 +121,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = async (email: string, pass: string, displayName: string) => {
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(userCredential.user, { displayName });
+      await sendEmailVerification(userCredential.user);
       
       const adminEmails = ['admin@gmail.com', 'sadmisn@gmail.com'];
 
@@ -133,9 +146,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       await setDoc(doc(db, "users", userCredential.user.uid), newUser);
-      setUser(userCredential.user);
-      setUserData(newUser);
-      router.push("/dashboard");
+      
+      setSuccessMessage("Account created! Please check your email to verify your account before logging in.");
+      await signOut(auth); // Sign out user until they verify
+      router.push("/auth");
+
     } catch (e: any) {
       if (e instanceof FirebaseError) {
         if (e.code === 'auth/email-already-in-use') {
@@ -149,6 +164,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Signup Error:", e);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const sendPasswordReset = async (email: string) => {
+    setLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+    try {
+        await sendPasswordResetEmail(auth, email);
+        setSuccessMessage("Password reset email sent! Check your inbox.");
+    } catch (e: any) {
+        if (e instanceof FirebaseError) {
+            if (e.code === 'auth/user-not-found') {
+                setError("No user found with this email address.");
+            } else {
+                setError("An error occurred. Please try again.");
+            }
+        } else {
+            setError("An unexpected error occurred.");
+        }
+        console.error("Password Reset Error:", e);
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -174,12 +212,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userRef = doc(db, "users", user.uid);
         const registrationRef = doc(db, `events/${eventId}/registrations`, user.uid);
 
-        // 1. Update user's registered events list
         transaction.update(userRef, {
           registeredEvents: arrayUnion(eventId)
         });
 
-        // 2. Create a registration record for the event
         const registrationData: EventRegistration = {
           userId: user.uid,
           userName: userData.displayName,
@@ -192,7 +228,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         transaction.set(registrationRef, registrationData);
       });
 
-      // 3. Refresh user data locally after successful transaction
       const userRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
@@ -215,13 +250,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
         const userRef = doc(db, "users", user.uid);
         
-        // Ensure displayName is updated in Auth if it changes
         if (profileData.displayName && profileData.displayName !== user.displayName) {
           await updateProfile(user, { displayName: profileData.displayName });
         }
         
         await updateDoc(userRef, profileData);
-        // Refresh user data locally
         const updatedUserDoc = await getDoc(userRef);
         if (updatedUserDoc.exists()) {
             setUserData(updatedUserDoc.data() as UserData);
@@ -242,7 +275,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await updatePassword(auth.currentUser, newPassword);
     } catch (error: any) {
         console.error("Password Update Error:", error);
-        // Firebase may require recent login for this operation.
         if (error.code === 'auth/requires-recent-login') {
             throw new Error("This action requires a recent login. Please log out and log back in to change your password.");
         }
@@ -251,7 +283,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, userData, loading, error, login, signup, logout, registerForEvent, updateUserProfile, updateUserPassword }}>
+    <AuthContext.Provider value={{ user, userData, loading, error, successMessage, login, signup, logout, sendPasswordReset, registerForEvent, updateUserProfile, updateUserPassword }}>
       {children}
     </AuthContext.Provider>
   );
