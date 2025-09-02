@@ -16,7 +16,6 @@ export function Hero() {
         muted
         playsInline
         className="absolute top-0 left-0 w-full h-full object-cover -z-20"
-        poster="https://picsum.photos/1920/1080?random=100"
       >
         <source src="/videos/bgvideo.mp4" type="video/mp4" />
         Your browser does not support the video tag.
