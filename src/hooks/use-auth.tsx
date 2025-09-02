@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setError(null);
       setSuccessMessage(null);
-      if (user) {
+      if (user && user.emailVerified) {
         setUser(user);
         const userDocRef = doc(db, "users", user.uid);
         const userDoc = await getDoc(userDocRef);
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
       if (!userCredential.user.emailVerified) {
-          setError("Please verify your email before logging in. Check your inbox for a verification link.");
+          setError("Please verify your email before logging in. If you didn't receive the email, try signing up again to resend it.");
           await signOut(auth); // Log out user until they are verified
       } else {
           router.push("/dashboard");
@@ -173,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSuccessMessage(null);
     try {
         await sendPasswordResetEmail(auth, email);
-        setSuccessMessage("Password reset email sent! Please check your inbox, including spam or junk folders.");
+        setSuccessMessage("Password reset email sent! Please check your inbox, including your spam or junk folder.");
     } catch (e: any) {
         console.error("Password Reset Error:", e);
         if (e instanceof FirebaseError) {
