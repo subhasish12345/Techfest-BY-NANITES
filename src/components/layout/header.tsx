@@ -2,11 +2,13 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
-import { Menu, Rocket, Code, LogOut, User, Shield, Home, Ticket, LayoutDashboard } from "lucide-react";
+import { Rocket, Code, LogOut, User, Shield, Home, Ticket, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Separator } from "../ui/separator";
+import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
@@ -14,8 +16,19 @@ const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 ];
 
+function AnimatedBurgerIcon({ open }: { open: boolean }) {
+    return (
+        <div className="w-6 h-6 flex flex-col justify-around items-center">
+            <span className={cn("block w-full h-0.5 bg-current transition-transform duration-300 ease-in-out", open ? "rotate-45 translate-y-2" : "")}></span>
+            <span className={cn("block w-full h-0.5 bg-current transition-opacity duration-300 ease-in-out", open ? "opacity-0" : "opacity-100")}></span>
+            <span className={cn("block w-full h-0.5 bg-current transition-transform duration-300 ease-in-out", open ? "-rotate-45 -translate-y-2" : "")}></span>
+        </div>
+    )
+}
+
 export function Header() {
   const { user, userData, loading, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/80 backdrop-blur-sm transition-all duration-300">
@@ -60,7 +73,7 @@ export function Header() {
               <Button variant="ghost" asChild>
                 <Link href="/auth">Log In</Link>
               </Button>
-              <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
+              <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 glow-shadow" asChild>
                 <Link href="/auth?form=signup">
                   Register Now
                   <Rocket className="ml-2 h-4 w-4" />
@@ -70,17 +83,17 @@ export function Header() {
           )}
         </div>
 
-        <Sheet>
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="h-6 w-6" />
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <AnimatedBurgerIcon open={mobileMenuOpen} />
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="right">
              <SheetHeader>
                 <SheetTitle>
-                    <Link href="/" className="flex items-center gap-2 self-start">
+                    <Link href="/" className="flex items-center gap-2 self-start" onClick={() => setMobileMenuOpen(false)}>
                         <Code className="h-8 w-8 text-primary" />
                         <span className="font-headline text-xl font-bold text-primary">
                         NANITES
@@ -92,7 +105,7 @@ export function Header() {
             <div className="flex h-full flex-col justify-between">
               <nav className="flex flex-col gap-4">
                 {navLinks.map((link) => (
-                    <Button key={link.href} variant="ghost" asChild className="justify-start">
+                    <Button key={link.href} variant="ghost" asChild className="justify-start" onClick={() => setMobileMenuOpen(false)}>
                         <Link href={link.href} className="text-lg flex items-center gap-4">
                             <link.icon className="h-5 w-5 text-primary" />
                             {link.label}
@@ -100,7 +113,7 @@ export function Header() {
                     </Button>
                 ))}
                  {userData?.role === 'admin' && (
-                    <Button variant="ghost" asChild className="justify-start">
+                    <Button variant="ghost" asChild className="justify-start" onClick={() => setMobileMenuOpen(false)}>
                         <Link href="/admin" className="text-lg flex items-center gap-4">
                             <Shield className="h-5 w-5 text-accent" />
                             Admin
@@ -115,17 +128,17 @@ export function Header() {
                      <div className="text-center text-muted-foreground">
                         Signed in as {user.displayName || user.email}
                      </div>
-                    <Button variant="outline" onClick={logout}>
+                    <Button variant="outline" onClick={() => { logout(); setMobileMenuOpen(false); }}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Log Out
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Button variant="outline" asChild>
+                    <Button variant="outline" asChild onClick={() => setMobileMenuOpen(false)}>
                       <Link href="/auth">Log In</Link>
                     </Button>
-                    <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
+                    <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 glow-shadow" asChild onClick={() => setMobileMenuOpen(false)}>
                       <Link href="/auth?form=signup">
                         Register Now
                         <Rocket className="ml-2 h-4 w-4" />
