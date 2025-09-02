@@ -10,6 +10,9 @@ import {
   serverTimestamp,
   deleteDoc,
   doc,
+  onSnapshot,
+  query,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
@@ -51,13 +54,6 @@ import {
 } from "@/components/ui/alert-dialog";
 
 
-const dummyUpdates: Update[] = [
-    { id: '1', message: 'The keynote speaker for the closing ceremony has been announced! Welcome Dr. Evelyn Reed.', timestamp: { toDate: () => new Date(Date.now() - 3600000) } as any },
-    { id: '2', message: 'Registration for the "Code Combat" hackathon closes in 2 hours. Grab your spot now!', timestamp: { toDate: () => new Date(Date.now() - 7200000) } as any },
-    { id: '3', message: 'Check out the new gallery section for highlights from Day 1.', timestamp: { toDate: () => new Date(Date.now() - 86400000) } as any },
-];
-
-
 export default function ManageUpdatesPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -74,23 +70,36 @@ export default function ManageUpdatesPage() {
   });
 
   useEffect(() => {
-    // Using dummy data
     setLoadingUpdates(true);
-    setUpdates(dummyUpdates);
-    setLoadingUpdates(false);
-  }, []);
+    const q = query(collection(db, "updates"), orderBy("timestamp", "desc"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const updatesData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      } as Update));
+      setUpdates(updatesData);
+      setLoadingUpdates(false);
+    }, (error) => {
+      console.error("Error fetching updates:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch updates.",
+      });
+      setLoadingUpdates(false);
+    });
+
+    return () => unsubscribe();
+  }, [toast]);
+
 
   const onSubmit = async (data: UpdateFormData) => {
     setIsLoading(true);
     try {
-      // NOTE: This will still try to write to Firestore and may fail if permissions are not set.
       await addDoc(collection(db, "updates"), {
         message: data.message,
         timestamp: serverTimestamp(),
       });
-      // Add to local state to simulate
-      const newUpdate = { id: Date.now().toString(), message: data.message, timestamp: { toDate: () => new Date() } as any};
-      setUpdates([newUpdate, ...updates]);
 
       toast({
         title: "Update Posted",
@@ -117,9 +126,7 @@ export default function ManageUpdatesPage() {
   const handleDeleteConfirm = async () => {
     if (!updateToDelete) return;
     try {
-      // NOTE: This will still try to delete from Firestore and may fail if permissions are not set.
       await deleteDoc(doc(db, "updates", updateToDelete));
-      setUpdates(updates.filter(u => u.id !== updateToDelete));
       toast({
         title: "Update Deleted",
         description: "The update has been successfully deleted.",
@@ -137,9 +144,17 @@ export default function ManageUpdatesPage() {
   };
 
   const formatTimestamp = (timestamp: any) => {
-    if (!timestamp) return 'Just now';
-    return new Date(timestamp.seconds * 1000).toLocaleString();
+    if (!timestamp || !timestamp.toDate) return 'Just now';
+    const date = timestamp.toDate();
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(date);
   };
+
 
   return (
     <div className="grid md:grid-cols-2 gap-8">
@@ -248,5 +263,3 @@ export default function ManageUpdatesPage() {
     </div>
   );
 }
-
-    
