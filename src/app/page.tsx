@@ -5,21 +5,33 @@ import { Sponsors } from "@/components/landing/sponsors";
 import { LiveUpdates } from "@/components/landing/live-updates";
 import { Gallery } from "@/components/landing/gallery";
 import { Separator } from "@/components/ui/separator";
+import { FadeIn } from "@/components/ui/fade-in";
+
 
 export default function Home() {
   return (
     <div className="flex flex-col">
       <Hero />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <EventCategories />
+        <FadeIn>
+          <EventCategories />
+        </FadeIn>
         <Separator className="my-16 md:my-24 bg-primary/20" />
-        <ScheduleTimeline />
+        <FadeIn>
+          <ScheduleTimeline />
+        </FadeIn>
         <Separator className="my-16 md:my-24 bg-primary/20" />
-        <Sponsors />
+        <FadeIn>
+          <Sponsors />
+        </FadeIn>
         <Separator className="my-16 md:my-24 bg-primary/20" />
-        <LiveUpdates />
+        <FadeIn>
+          <LiveUpdates />
+        </FadeIn>
         <Separator className="my-16 md:my-24 bg-primary/20" />
-        <Gallery />
+        <FadeIn>
+          <Gallery />
+        </FadeIn>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
-import { Menu, Rocket, Code, LogOut, User, Shield, Home, Calendar, LayoutDashboard, Ticket } from "lucide-react";
+import { Menu, Rocket, Code, LogOut, User, Shield, Home, Ticket, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Separator } from "../ui/separator";
 
@@ -18,7 +18,7 @@ export function Header() {
   const { user, userData, loading, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/50 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/80 backdrop-blur-sm transition-all duration-300">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
           <Code className="h-8 w-8 text-primary" />
@@ -60,7 +60,7 @@ export function Header() {
               <Button variant="ghost" asChild>
                 <Link href="/auth">Log In</Link>
               </Button>
-              <Button className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
+              <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
                 <Link href="/auth?form=signup">
                   Register Now
                   <Rocket className="ml-2 h-4 w-4" />
@@ -125,7 +125,7 @@ export function Header() {
                     <Button variant="outline" asChild>
                       <Link href="/auth">Log In</Link>
                     </Button>
-                    <Button className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
+                    <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
                       <Link href="/auth?form=signup">
                         Register Now
                         <Rocket className="ml-2 h-4 w-4" />

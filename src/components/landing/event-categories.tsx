@@ -56,10 +56,10 @@ export function EventCategories() {
         {allCategories.map((category) => {
           const Icon = iconMap[category] || Code2;
           return (
-            <Card key={category} className="group transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg hover:shadow-primary/20 bg-card border-primary/20">
+            <Card key={category} className="group transform transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:shadow-primary/20 hover:border-primary bg-card border-primary/20">
               <CardHeader>
                 <div className="flex items-center gap-4">
-                  <Icon className="h-8 w-8 text-accent" />
+                  <Icon className="h-8 w-8 text-accent transition-colors duration-300 group-hover:text-primary" />
                   <CardTitle className="font-headline text-xl text-primary-foreground">{category}</CardTitle>
                 </div>
               </CardHeader>
