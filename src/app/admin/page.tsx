@@ -4,10 +4,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BarChart2, Users, Calendar, Edit, Trash2 } from "lucide-react";
+import { BarChart2, Users, Calendar, Trash2 } from "lucide-react";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import Link from "next/link";
 import Image from "next/image";
 import type { Event } from "@/lib/types";
 import { events as dummyEvents } from "@/lib/data";
@@ -165,7 +164,7 @@ export default function AdminDashboardPage() {
         <CardHeader className="flex flex-row items-center justify-between">
             <div>
                 <CardTitle>Manage Events</CardTitle>
-                <CardDescription>Edit or delete festival events.</CardDescription>
+                <CardDescription>Delete festival events.</CardDescription>
             </div>
         </CardHeader>
         <CardContent>
@@ -197,11 +196,6 @@ export default function AdminDashboardPage() {
                         {event.date}, {event.time}
                     </TableCell>
                     <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" asChild>
-                            <Link href={`/admin/events/edit/${event.id}`}>
-                                <Edit className="h-4 w-4" />
-                            </Link>
-                        </Button>
                         <Button
                         variant="ghost"
                         size="icon"
